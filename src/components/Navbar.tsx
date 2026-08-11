@@ -48,13 +48,13 @@ export const Navbar: React.FC<NavbarProps> = ({
     { id: 'about', label: t("À propos", "About"), icon: UserCheck },
     { id: 'research', label: t("Recherches", "Research"), icon: Brain },
     { id: 'publications', label: t("Publications", "Publications"), icon: BookOpen },
-    { id: 'communications', label: t("Communications", "Talks & Posters"), icon: MessageSquare },
+    { id: 'communications', label: t("Communications", "Communications"), icon: MessageSquare },
+    { id: 'awards', label: t("Prix & Diplômes", "Awards & Certs"), icon: Award },
+    { id: 'cv', label: t("CV", "CV"), icon: FileText },
     { id: 'projects', label: t("Projets", "Projects"), icon: FolderGit2 },
     { id: 'software', label: t("Logiciels & Datasets", "Software & Data"), icon: FolderGit2 },
     // { id: 'teaching', label: t("Enseignement", "Teaching"), icon: GraduationCap },
     { id: 'gallery', label: t("Galerie & Média", "Gallery & Media"), icon: ImageIcon },
-    { id: 'awards', label: t("Prix & Diplômes", "Awards & Certs"), icon: Award },
-    { id: 'cv', label: t("CV", "CV"), icon: FileText },
     { id: 'contact', label: t("Contact", "Contact"), icon: Mail }
   ];
 
@@ -76,7 +76,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand / Name Logo */}
         <button
           onClick={() => handleNavClick('home')}
+          onDoubleClick={onOpenAdmin}
           className="flex items-center gap-3 group text-left"
+          title="Double-click to open Admin Dashboard"
         >
           <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-600/20 group-hover:scale-105 transition">
             <Brain className="w-5 h-5" />
@@ -134,16 +136,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="uppercase">{language}</span>
           </button>
 
-          {/* Admin Content Manager Modal Trigger */}
-          <button
-            onClick={onOpenAdmin}
-            className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold shadow-sm transition active:scale-95"
-            title={t("Gérer les contenus du site", "Manage Site Content")}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Admin</span>
-          </button>
-
           {/* Mobile Menu Hamburger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -175,18 +167,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             );
           })}
-          <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
-            <button
-              onClick={() => {
-                onOpenAdmin();
-                setMobileMenuOpen(false);
-              }}
-              className="w-full text-left px-4 py-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold text-sm flex items-center gap-2"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>{t("Tableau de bord Administrateur", "Admin Content Hub")}</span>
-            </button>
-          </div>
         </div>
       )}
     </header>
