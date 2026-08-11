@@ -24,7 +24,7 @@ export const profileData = {
   emailSecondary: "ouattyacouba@hotmail.fr",
   phonePrimary: "+225 05 56 38 30 00",
   location: "Abidjan, Côte d'Ivoire",
-  photoUrl: "https://drive.google.com/file/d/1KjA9TV5dfqNK1uNW2upGHpFe6e1p52iO/view?usp=sharing", // Will fall back or render nicely with user avatar
+  photoUrl: "https://drive.google.com/uc?export=view&id=1KjA9TV5dfqNK1uNW2upGHpFe6e1p52iO", // Will fall back or render nicely with user avatar
   orcid: "0009-0003-4527-1461",
   orcidUrl: "https://orcid.org/0009-0003-4527-1461",
   linkedinUrl: "https://www.linkedin.com/in/yacouba-ouattara-089743146/",

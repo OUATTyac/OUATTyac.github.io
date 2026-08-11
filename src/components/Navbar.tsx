@@ -78,7 +78,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           onClick={() => handleNavClick('home')}
           onDoubleClick={onOpenAdmin}
           className="flex items-center gap-3 group text-left"
-          title="Double-click to open Admin Dashboard"
         >
           <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-md shadow-indigo-600/20 group-hover:scale-105 transition">
             <Brain className="w-5 h-5" />
