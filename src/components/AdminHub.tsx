@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  X, Plus, Trash2, Download, Upload, RotateCcw, Check, Sparkles,
+  X, Plus, Trash2, Download, Upload, RotateCcw, Check, Sparkles, Award,
   BookOpen, MessageSquare, Briefcase, Newspaper, Image as ImageIcon,
   FileText, Paperclip, Copy, ExternalLink, Film, FolderPlus, Link2, Pencil, Edit3, Save
 } from 'lucide-react';
@@ -38,6 +38,8 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
     updateNewsItem,
     updateGalleryPhoto,
     updateMediaFile,
+    awards,
+    updateAward,
     deleteItem,
     resetAllToDefault,
     exportBackupJSON,
@@ -110,33 +112,71 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
   const [photoFileName, setPhotoFileName] = useState('');
 
   // Managing and Editing state
-  const [manageCategory, setManageCategory] = useState<'pubs' | 'comms' | 'news' | 'projects' | 'gallery' | 'media' | 'backup'>('pubs');
+  const [manageCategory, setManageCategory] = useState<'pubs' | 'comms' | 'news' | 'projects' | 'gallery' | 'media' | 'backup' | 'awards'>('pubs');
   const [editingPub, setEditingPub] = useState<Publication | null>(null);
   const [editingComm, setEditingComm] = useState<Communication | null>(null);
   const [editingNews, setEditingNews] = useState<NewsItem | null>(null);
   const [editingProj, setEditingProj] = useState<Project | null>(null);
   const [editingPhoto, setEditingPhoto] = useState<GalleryPhoto | null>(null);
   const [editingMedia, setEditingMedia] = useState<MediaFile | null>(null);
+  const [editingAward, setEditingAward] = useState<any | null>(null);
 
   const [jsonInput, setJsonInput] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  // File reader helper
+  // File reader helper with image compression
   const handleFileRead = (
     e: React.ChangeEvent<HTMLInputElement>,
     onLoad: (dataUrl: string, file: File) => void
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === 'string') {
-        onLoad(reader.result, file);
+
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          
+          const MAX_SIZE = 800;
+          if (width > height && width > MAX_SIZE) {
+            height *= MAX_SIZE / width;
+            width = MAX_SIZE;
+          } else if (height > MAX_SIZE) {
+            width *= MAX_SIZE / height;
+            height = MAX_SIZE;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          onLoad(dataUrl, file);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      // PDF or other files
+      if (file.size > 2 * 1024 * 1024) {
+        alert(t("Le fichier est trop volumineux (> 2MB). Veuillez plutôt insérer un lien (URL) pour éviter de bloquer le site.", "File is too large (> 2MB). Please paste a URL link instead to avoid freezing the site."));
+        return;
       }
-    };
-    reader.readAsDataURL(file);
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          onLoad(reader.result, file);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -378,6 +418,15 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
             {t("Publier Actualité", "Publish News")}
           </button>
           <button
+            onClick={() => setActiveTab('profile')}
+            className={`px-3.5 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'profile' ? 'bg-indigo-600 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
+            }`}
+          >
+            <ImageIcon className="w-3.5 h-3.5 text-emerald-500" />
+            {t("Photo de Profil", "Profile Photo")}
+          </button>
+          <button
             onClick={() => setActiveTab('manage')}
             className={`px-3.5 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap ${
               activeTab === 'manage' ? 'bg-indigo-600 text-white font-semibold' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
@@ -617,7 +666,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
               {/* Documents & Médias pour Communication */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 rounded-2xl">
                 {/* PDF */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 flex flex-col">
                   <label className="block font-semibold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5 text-[11px]">
                     <FileText className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                     {t("PDF Poster / Slides", "PDF Poster / Slides")}
@@ -628,18 +677,27 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                     onChange={e => handleFileRead(e, (dataUrl, file) => {
                       setCommPdfDataUrl(dataUrl);
                       setCommPdfFileName(file.name);
+                      setCommPdfUrlInput('');
                     })}
                     className="text-[10px] text-slate-600 dark:text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer w-full"
                   />
+                  <div className="text-[10px] text-slate-500 font-semibold my-0.5 text-center">OU / OR</div>
+                  <input
+                    type="text"
+                    value={commPdfUrlInput}
+                    onChange={e => { setCommPdfUrlInput(e.target.value); setCommPdfDataUrl(''); setCommPdfFileName(''); }}
+                    placeholder="URL du PDF..."
+                    className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-[10px]"
+                  />
                   {commPdfFileName && (
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 truncate">
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 truncate mt-1">
                       <Check className="w-3 h-3" /> {commPdfFileName}
                     </span>
                   )}
                 </div>
 
                 {/* Photo / Image */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 flex flex-col">
                   <label className="block font-semibold text-indigo-900 dark:text-indigo-300 flex items-center gap-1.5 text-[11px]">
                     <ImageIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
                     {t("Photo / Illustration", "Photo / Illustration")}
@@ -650,11 +708,20 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                     onChange={e => handleFileRead(e, (dataUrl, file) => {
                       setCommImageDataUrl(dataUrl);
                       setCommImageFileName(file.name);
+                      setCommImageUrlInput('');
                     })}
                     className="text-[10px] text-slate-600 dark:text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer w-full"
                   />
+                  <div className="text-[10px] text-slate-500 font-semibold my-0.5 text-center">OU / OR</div>
+                  <input
+                    type="text"
+                    value={commImageUrlInput}
+                    onChange={e => { setCommImageUrlInput(e.target.value); setCommImageDataUrl(''); setCommImageFileName(''); }}
+                    placeholder="URL de l'image..."
+                    className="w-full px-2 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-[10px]"
+                  />
                   {commImageFileName && (
-                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 truncate">
+                    <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1 truncate mt-1">
                       <Check className="w-3 h-3" /> {commImageFileName}
                     </span>
                   )}
@@ -1076,6 +1143,66 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
             </form>
           )}
 
+          {activeTab === 'profile' && (
+            <div className="space-y-6 text-xs">
+              <div className="p-5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+                <div className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100 text-sm">
+                  <ImageIcon className="w-4 h-4 text-emerald-600" />
+                  {t("Modifier la photo de profil (Accueil)", "Change Profile Photo (Home)")}
+                </div>
+                <p className="text-slate-500 text-[11px]">
+                  {t("Entrez l'URL de la photo ou téléchargez une nouvelle image pour modifier la photo affichée sur la page d'accueil.", "Enter an image URL or upload a new photo to change the picture displayed on the homepage.")}
+                </p>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-md shrink-0 border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 relative">
+                    <img src={profilePhotoUrl || "https://placehold.co/400x500/1e1e2f/ffffff?text=Photo"} alt="Current Profile" className="w-full h-full object-cover" />
+                  </div>
+                  
+                  <div className="flex-1 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={e => handleFileRead(e, (dataUrl) => {
+                          setUserPhotoUrlInput(dataUrl);
+                        })}
+                        className="text-xs text-slate-600 dark:text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
+                      />
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-500">OU</span>
+                      <input
+                        type="text"
+                        value={userPhotoUrlInput}
+                        onChange={e => setUserPhotoUrlInput(e.target.value)}
+                        placeholder="https://..."
+                        className="flex-1 px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={() => {
+                    if (userPhotoUrlInput) {
+                      updateProfilePhotoUrl(userPhotoUrlInput);
+                      setSuccessMsg(t("Photo de profil mise à jour !", "Profile photo updated!"));
+                      setUserPhotoUrlInput('');
+                      setTimeout(() => setSuccessMsg(''), 3000);
+                    }
+                  }}
+                  disabled={!userPhotoUrlInput}
+                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white font-semibold rounded-xl transition flex items-center gap-2"
+                >
+                  <Save className="w-4 h-4" />
+                  {t("Sauvegarder", "Save")}
+                </button>
+              </div>
+            </div>
+          )}
+
           {activeTab === 'manage' && (
             <div className="space-y-6 text-xs">
               {/* Category selector inside Manage */}
@@ -1085,6 +1212,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                   { id: 'comms', label: `Communications (${communications.length})`, icon: MessageSquare },
                   { id: 'news', label: `Actualités (${news.length})`, icon: Newspaper },
                   { id: 'projects', label: `Projets (${projects.length})`, icon: Briefcase },
+                  { id: 'awards', label: `Prix & Financements (${awards?.length || 0})`, icon: Award },
                   { id: 'gallery', label: `Galerie (${galleryPhotos.length})`, icon: ImageIcon },
                   { id: 'media', label: `Médiathèque (${mediaFiles.length})`, icon: Film },
                   { id: 'backup', label: t('Sauvegarde / JSON', 'Backup / JSON'), icon: Download },
@@ -1299,6 +1427,123 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {/* LIST AWARDS */}
+              {manageCategory === 'awards' && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-slate-900 dark:text-slate-100 text-sm">
+                      {t("Prix & Financements", "Awards & Funding")} ({awards?.length || 0})
+                    </span>
+                    <button
+                      onClick={() => {
+                        const newAward = {
+                          id: `award-${Date.now()}`,
+                          title: { fr: '', en: '' },
+                          organization: '',
+                          year: new Date().getFullYear(),
+                          category: 'award',
+                          description: { fr: '', en: '' },
+                          credentialUrl: ''
+                        };
+                        setEditingAward(newAward);
+                      }}
+                      className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      {t("Ajouter", "Add")}
+                    </button>
+                  </div>
+
+                  {editingAward ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        if (awards?.find(a => a.id === editingAward.id)) {
+                          updateAward(editingAward);
+                        } else {
+                          addAward(editingAward);
+                        }
+                        setEditingAward(null);
+                        setSuccessMsg("Prix / Financement sauvegardé !");
+                        setTimeout(() => setSuccessMsg(''), 3000);
+                      }}
+                      className="p-4 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-3"
+                    >
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-700 dark:text-slate-300">Titre</label>
+                        <input
+                          type="text"
+                          required
+                          value={editingAward.title.fr}
+                          onChange={e => setEditingAward({ ...editingAward, title: { fr: e.target.value, en: e.target.value } })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-700 dark:text-slate-300">Organisation</label>
+                        <input
+                          type="text"
+                          required
+                          value={editingAward.organization}
+                          onChange={e => setEditingAward({ ...editingAward, organization: e.target.value })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-700 dark:text-slate-300">Période / Description</label>
+                        <input
+                          type="text"
+                          required
+                          value={editingAward.description.fr}
+                          onChange={e => setEditingAward({ ...editingAward, description: { fr: e.target.value, en: e.target.value } })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="font-bold text-slate-700 dark:text-slate-300">URL du Financement (Optionnel)</label>
+                        <input
+                          type="text"
+                          value={editingAward.credentialUrl || ''}
+                          onChange={e => setEditingAward({ ...editingAward, credentialUrl: e.target.value })}
+                          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl"
+                        />
+                      </div>
+                      
+                      <div className="flex justify-end gap-2 pt-2">
+                        <button type="button" onClick={() => setEditingAward(null)} className="px-4 py-2 bg-slate-200 text-slate-700 rounded-xl">Annuler</button>
+                        <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold">Sauvegarder</button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                      {awards?.map(award => (
+                        <div key={award.id} className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <div className="space-y-1 min-w-0 flex-1">
+                            <h5 className="font-bold text-slate-900 dark:text-slate-100 text-xs line-clamp-1">{award.title.fr}</h5>
+                            <p className="text-[11px] text-slate-500">{award.organization}</p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              onClick={() => setEditingAward(award)}
+                              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition flex items-center gap-1"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                              <span>{t("Modifier", "Edit")}</span>
+                            </button>
+                            <button
+                              onClick={() => deleteItem('awards', award.id)}
+                              className="p-1.5 bg-red-100 dark:bg-red-950/60 text-red-600 hover:bg-red-600 hover:text-white rounded-xl transition"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 

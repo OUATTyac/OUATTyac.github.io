@@ -23,7 +23,6 @@ export const profileData = {
   emailPrimary: "ouattara.yacouba03@ufhb.edu.ci",
   emailSecondary: "ouattyacouba@hotmail.fr",
   phonePrimary: "+225 05 56 38 30 00",
-  phoneSecondary: "+225 07 59 40 65 88",
   location: "Abidjan, Côte d'Ivoire",
   photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=800", // Will fall back or render nicely with user avatar
   orcid: "0009-0003-4527-1461",

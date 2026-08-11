@@ -14,7 +14,8 @@ import {
   ChevronRight,
   ExternalLink,
   Building2,
-  FileText
+  FileText,
+  MessageSquare
 } from 'lucide-react';
 import { profileData } from '../data/profileData';
 import { useContent } from '../context/ContentContext';
@@ -35,7 +36,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onSelectCommunication
 }) => {
   const { t } = useLanguage();
-  const { publications = [], communications = [], projects = [], researchAreas = [], news = [] } = useContent();
+  const { publications = [], communications = [], projects = [], researchAreas = [], news = [], profilePhotoUrl } = useContent();
 
   const featuredPubs = publications.slice(0, 5);
   const featuredComms = communications.slice(0, 4);
@@ -51,11 +52,6 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
           {/* Hero Left Column: Name & Actions */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/80 text-indigo-700 dark:text-indigo-300 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>{t("Plateforme Académique & Scientifique Officielle v2.0", "Official Academic & Scientific Platform v2.0")}</span>
-            </div>
-
             <div>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight leading-[1.1]">
                 Yacouba <span className="text-indigo-600 dark:text-indigo-400">OUATTARA</span>
@@ -76,18 +72,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
             {/* Main Call To Actions */}
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
-                onClick={() => setActiveView('cv')}
+                onClick={() => setActiveView('research')}
                 className="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-lg shadow-indigo-600/25 transition flex items-center gap-2 active:scale-95"
               >
-                <Download className="w-4 h-4" />
-                <span>{t("Télécharger CV", "Download CV")}</span>
-              </button>
-
-              <button
-                onClick={() => setActiveView('research')}
-                className="px-6 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-semibold text-sm transition flex items-center gap-2"
-              >
-                <Brain className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                <Brain className="w-4 h-4" />
                 <span>{t("Axes de Recherche", "Research")}</span>
               </button>
 
@@ -97,6 +85,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
               >
                 <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>{t("Publications", "Publications")}</span>
+              </button>
+
+              <button
+                onClick={() => setActiveView('communications')}
+                className="px-6 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-100 font-semibold text-sm transition flex items-center gap-2"
+              >
+                <MessageSquare className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span>{t("Communications", "Communications")}</span>
               </button>
 
               <button
@@ -128,7 +124,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
               <div className="aspect-[4/3] rounded-2xl bg-gradient-to-tr from-indigo-900 via-slate-900 to-indigo-950 relative overflow-hidden mb-6 flex items-center justify-center text-white">
                 <img
-                  src={profileData.photoUrl}
+                  src={profilePhotoUrl || profileData.photoUrl}
                   alt={profileData.name}
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                 />
@@ -154,8 +150,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
                 <div className="p-3.5 bg-emerald-50 dark:bg-emerald-950/40 rounded-2xl border border-emerald-100 dark:border-emerald-900/50 flex items-center justify-between text-xs">
                   <div>
-                    <div className="text-emerald-900 dark:text-emerald-300 font-bold">2nd Prize Best Communication</div>
-                    <div className="text-emerald-700 dark:text-emerald-400">Student Symposium on Clinical Research 2025</div>
+                    <div className="text-emerald-900 dark:text-emerald-300 font-bold">Funding: FENS Forum 2026</div>
+                    <div className="text-emerald-700 dark:text-emerald-400">Chica and Heinz Schaller Foundation</div>
                   </div>
                   <Award className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 </div>

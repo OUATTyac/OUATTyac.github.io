@@ -57,19 +57,5 @@ export const initialNews: NewsItem[] = [
       en: "New paper published examining acute cognitive effects of Johnson & Johnson COVID-19 vaccination in Côte d'Ivoire."
     },
     featured: false
-  },
-  {
-    id: "news-2025-award",
-    date: "2025-06-12",
-    title: {
-      fr: "Lauréat du 2e Prix de la Meilleure Communication Orale",
-      en: "Winner of 2nd Prize for Best Oral Communication"
-    },
-    category: "award",
-    summary: {
-      fr: "Distinction reçue lors du Student Symposium on Clinical Research pour nos travaux sur la classification des signaux EEG par Machine Learning.",
-      en: "Awarded 2nd Prize at the Student Symposium on Clinical Research for machine learning EEG state classification."
-    },
-    featured: true
   }
 ];

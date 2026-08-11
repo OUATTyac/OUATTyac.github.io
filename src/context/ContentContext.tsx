@@ -79,6 +79,7 @@ interface ContentContextType {
   deleteGalleryPhoto: (id: string) => void;
   addMediaFile: (media: Omit<MediaFile, 'id' | 'createdAt'>) => void;
   deleteMediaFile: (id: string) => void;
+  addAward: (award: Omit<Award, 'id'>) => void;
   
   updatePublication: (pub: Publication) => void;
   updateCommunication: (comm: Communication) => void;
@@ -86,8 +87,9 @@ interface ContentContextType {
   updateNewsItem: (news: NewsItem) => void;
   updateGalleryPhoto: (photo: GalleryPhoto) => void;
   updateMediaFile: (media: MediaFile) => void;
+  updateAward: (award: Award) => void;
 
-  deleteItem: (collection: 'publications' | 'communications' | 'projects' | 'news' | 'gallery', id: string) => void;
+  deleteItem: (collection: 'publications' | 'communications' | 'projects' | 'news' | 'gallery' | 'awards', id: string) => void;
   resetAllToDefault: () => void;
   exportBackupJSON: () => string;
   importBackupJSON: (jsonStr: string) => boolean;
@@ -145,7 +147,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const [courses] = useState<Course[]>(initialCourses);
   const [resources] = useState<Resource[]>(initialResources);
-  const [awards] = useState<Award[]>(initialAwards);
+  const [awards, setAwards] = useState<Award[]>(() => {
+    try {
+      const saved = localStorage.getItem('yac_awards');
+      return saved ? JSON.parse(saved) : initialAwards;
+    } catch {
+      return initialAwards;
+    }
+  });
 
   const [news, setNews] = useState<NewsItem[]>(() => {
     try {
@@ -194,36 +203,76 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Sync to localStorage
   useEffect(() => {
-    localStorage.setItem('yac_pubs', JSON.stringify(publications));
+    try {
+      localStorage.setItem('yac_pubs', JSON.stringify(publications));
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
   }, [publications]);
 
   useEffect(() => {
-    localStorage.setItem('yac_comms', JSON.stringify(communications));
+    try {
+      localStorage.setItem('yac_comms', JSON.stringify(communications));
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
   }, [communications]);
 
   useEffect(() => {
-    localStorage.setItem('yac_projects', JSON.stringify(projects));
+    try {
+      localStorage.setItem('yac_projects', JSON.stringify(projects));
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
   }, [projects]);
 
   useEffect(() => {
-    localStorage.setItem('yac_news', JSON.stringify(news));
+    try {
+      localStorage.setItem('yac_news', JSON.stringify(news));
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
   }, [news]);
 
   useEffect(() => {
-    localStorage.setItem('yac_software', JSON.stringify(software));
+    try {
+      localStorage.setItem('yac_software', JSON.stringify(software));
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
   }, [software]);
 
   useEffect(() => {
-    localStorage.setItem('yac_datasets', JSON.stringify(datasets));
+    try {
+      localStorage.setItem('yac_datasets', JSON.stringify(datasets));
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
   }, [datasets]);
 
   useEffect(() => {
-    localStorage.setItem('yac_gallery', JSON.stringify(galleryPhotos));
+    try {
+      localStorage.setItem('yac_gallery', JSON.stringify(galleryPhotos));
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
   }, [galleryPhotos]);
 
   useEffect(() => {
-    localStorage.setItem('yac_media', JSON.stringify(mediaFiles));
+    try {
+      localStorage.setItem('yac_media', JSON.stringify(mediaFiles));
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
   }, [mediaFiles]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('yac_awards', JSON.stringify(awards));
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
+  }, [awards]);
 
   const addPublication = (pubData: Omit<Publication, 'id'>) => {
     const newPub: Publication = {
@@ -298,6 +347,18 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setMediaFiles(prev => prev.filter(m => m.id !== id));
   };
 
+  const addAward = (awardData: Omit<Award, 'id'>) => {
+    const newAward: Award = {
+      ...awardData,
+      id: `award-${Date.now()}`
+    };
+    setAwards(prev => [newAward, ...prev]);
+  };
+
+  const updateAward = (award: Award) => {
+    setAwards(prev => prev.map(a => a.id === award.id ? award : a));
+  };
+
   const updatePublication = (pub: Publication) => {
     setPublications(prev => prev.map(p => p.id === pub.id ? pub : p));
   };
@@ -322,12 +383,13 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setMediaFiles(prev => prev.map(m => m.id === media.id ? media : m));
   };
 
-  const deleteItem = (collection: 'publications' | 'communications' | 'projects' | 'news' | 'gallery', id: string) => {
+  const deleteItem = (collection: 'publications' | 'communications' | 'projects' | 'news' | 'gallery' | 'awards', id: string) => {
     if (collection === 'publications') setPublications(prev => prev.filter(i => i.id !== id));
     if (collection === 'communications') setCommunications(prev => prev.filter(i => i.id !== id));
     if (collection === 'projects') setProjects(prev => prev.filter(i => i.id !== id));
     if (collection === 'news') setNews(prev => prev.filter(i => i.id !== id));
     if (collection === 'gallery') setGalleryPhotos(prev => prev.filter(i => i.id !== id));
+    if (collection === 'awards') setAwards(prev => prev.filter(i => i.id !== id));
   };
 
   const resetAllToDefault = () => {
@@ -413,6 +475,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         updateNewsItem,
         updateGalleryPhoto,
         updateMediaFile,
+        addAward,
+        updateAward,
         deleteItem,
         resetAllToDefault,
         exportBackupJSON,

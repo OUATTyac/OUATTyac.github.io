@@ -1,10 +1,11 @@
 import React from 'react';
 import { Award, CheckCircle2, ExternalLink, Sparkles, ShieldCheck } from 'lucide-react';
-import { initialAwards } from '../data/awardsData';
 import { useLanguage } from '../context/LanguageContext';
+import { useContent } from '../context/ContentContext';
 
 export const AwardsView: React.FC = () => {
   const { t } = useLanguage();
+  const { awards } = useContent();
 
   return (
     <div className="space-y-10 pb-12 animate-fade-in">
@@ -27,31 +28,9 @@ export const AwardsView: React.FC = () => {
         </div>
       </div>
 
-      {/* Highlights Banner: 2nd Prize Best Communication 2025 */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-900 via-slate-900 to-amber-950 text-white border border-amber-800/80 shadow-lg flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-800/80 text-amber-200 text-xs font-bold uppercase">
-            <Award className="w-4 h-4 text-amber-300" />
-            <span>{t("2ème Prix Meilleure Communication 2025", "2nd Prize Best Oral Communication 2025")}</span>
-          </div>
-          <h3 className="text-xl font-extrabold text-white">
-            Symposium Étudiant de Recherche Clinique & Fondamentale
-          </h3>
-          <p className="text-xs text-slate-300 max-w-2xl">
-            {t(
-              "Décerné pour la communication oratoire sur la modélisation neuro-oscillatoire EEG de la mémoire de travail et les implications dans l'apprentissage universitaire.",
-              "Awarded for outstanding oral presentation on EEG neuro-oscillatory modeling of working memory in university learners."
-            )}
-          </p>
-        </div>
-        <div className="px-5 py-3 rounded-2xl bg-amber-500 text-slate-950 font-black text-sm shadow-md shrink-0">
-          Prize Winner 2025
-        </div>
-      </div>
-
       {/* Awards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {initialAwards.map(award => (
+        {awards?.map(award => (
           <div
             key={award.id}
             className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-3 flex flex-col justify-between"

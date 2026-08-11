@@ -2,18 +2,34 @@ import { Award } from '../types';
 
 export const initialAwards: Award[] = [
   {
-    id: "award-2nd-prize-sscr-2025",
+    id: "funding-fens-2026",
     title: {
-      fr: "2e Prix de la Meilleure Communication Orale",
-      en: "2nd Prize for Best Oral Communication"
+      fr: "Adaptive Brain-Computer Interface for Education: Real-time EEG-based Modulation of Digital Screens Enhances Working Memory",
+      en: "Adaptive Brain-Computer Interface for Education: Real-time EEG-based Modulation of Digital Screens Enhances Working Memory"
     },
-    organization: "Student Symposium on Clinical Research, Abidjan",
+    organization: "Chica and Heinz Schaller Foundation (Brussels, DE)",
     year: 2025,
-    category: "prize",
+    category: "award",
     description: {
-      fr: "Décerné pour la présentation remarquable sur la classification automatique des états cérébraux par Machine Learning et signaux EEG.",
-      en: "Awarded for outstanding oral presentation on automated brain state classification from EEG signals via machine learning algorithms."
-    }
+      fr: "2025 to 2026 | Award",
+      en: "2025 to 2026 | Award"
+    },
+    credentialUrl: "https://www.alba.network/TravelAwardees-FENS2026"
+  },
+  {
+    id: "funding-pasres-2026",
+    title: {
+      fr: "Examen neuroscientifique des facteurs intervenants dans l'efficacité des écrans comme outil pour l'apprentissage.",
+      en: "Examen neuroscientifique des facteurs intervenants dans l'efficacité des écrans comme outil pour l'apprentissage."
+    },
+    organization: "Programme d'Appui Stratégique à la Recherche Scientifique (PASRES/CSRS) (Abidjan, CI)",
+    year: 2025,
+    category: "award",
+    description: {
+      fr: "2025 to 2026 | Award",
+      en: "2025 to 2026 | Award"
+    },
+    credentialUrl: "http://www.csrs.ch/pasres"
   },
   {
     id: "cert-certiport-ai-2025",
