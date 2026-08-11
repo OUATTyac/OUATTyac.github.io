@@ -124,6 +124,7 @@ export const initialPublications: Publication[] = [
   journal={Brain and Neuroscience Advances},
   volume={9},
   year={2025},
+  doi={https://doi.org/10.1177/23982128251356029}
   pmid={40718468}
 }`,
     researchAreaId: "area-working-memory"

@@ -86,7 +86,7 @@ export const CvView: React.FC = () => {
           <div className="space-y-3 text-xs">
             <div className="flex justify-between font-bold">
               <span>Doctorat en Neurosciences Cognitives</span>
-              <span>2023 - Présent</span>
+              <span>2022 - Présent</span>
             </div>
             <p className="text-slate-600 dark:text-slate-400">Université Félix Houphouët-Boigny (UFHB) • Côte d'Ivoire</p>
             <p className="text-slate-500 dark:text-slate-400 italic mt-0.5">Sujet de thèse : Examen neuroscientifique des facteurs intervenants dans l'efficacité des écrans comme outil pour l'apprentissage.</p>
@@ -228,7 +228,7 @@ export const CvView: React.FC = () => {
             <div className="space-y-2">
               <div className="font-bold text-slate-900 dark:text-slate-100">Affiliations & Engagements</div>
               <ul className="list-disc list-outside space-y-1.5 ml-4 text-slate-600 dark:text-slate-400">
-                <li>Sollicité pour être Informaticien et chargé de communication du PTR Changement Climatique du CAMES pour l’organisation du Forum Africain sur le Climat (FAC 2025), tenu à l’Université Félix Houphouët-Boigny du 28 juillet au 02 août 2025.</li>
+                <li>Informaticien et chargé de communication du PTR Changement Climatique du CAMES pour l’organisation du Forum Africain sur le Climat (FAC 2025), tenu à l’Université Félix Houphouët-Boigny du 28 juillet au 02 août 2025.</li>
                 <li>Membre fondateur (Vice-président) du Club Informatique et Multimédia UFHB : formation de plus de 1000 étudiants (Licence, Master, Doctorat) en partenariat avec l’UFHB et l’AUF Côte d’Ivoire en analyse de données, bureautique et marketing digital.</li>
                 <li>Membre de l'Association pour la Recherche en Neuroéducation (ARN).</li>
                 <li>Membre de la Fédération Européenne des Sociétés de Neurosciences (FENS).</li>

@@ -19,7 +19,7 @@ export const profileData = {
     ],
   },
   institution: "Université Félix Houphouët-Boigny (UFHB), Abidjan, Côte d'Ivoire",
-  faculty: "UFR Biosciences - Équipe Biologie et Santé / École Doctorale Biologie-Environnement-Santé",
+  faculty: "UFR Biosciences - Laboratoire Biologie et Santé / École Doctorale Biologie-Environnement-Santé",
   emailPrimary: "ouattara.yacouba03@ufhb.edu.ci",
   emailSecondary: "ouattyacouba@hotmail.fr",
   phonePrimary: "+225 05 56 38 30 00",
@@ -31,7 +31,7 @@ export const profileData = {
   researchGateUrl: "https://www.researchgate.net/profile/Yacouba-Ouattara-3",
   halUrl: "https://hal.science/hal-05310406",
   sciProfilesUrl: "https://sciprofiles.com/profile/yacouba-ouattara",
-  githubUrl: "https://github.com/ouattyac95",
+  githubUrl: "https://github.com/",
   
   bio: {
     fr: "Jeune chercheur et formateur certifié Microsoft spécialisé en Neurosciences Cognitives, Intelligence Artificielle et Ingénierie Pédagogique. Doctorant à l'Université Félix Houphouët-Boigny, mes recherches explorent les mécanismes neurophysiologiques de la mémoire de travail visuospatiale, les dynamiques oscillatoires pariéto-occipitales par EEG, et l'intégration de l'IA adaptative pour l'éducation et la santé mentale en Afrique.",
@@ -49,7 +49,7 @@ export const profileData = {
     projectsCount: 5,
     softwareCount: 4,
     datasetsCount: 3,
-    teachingHoursYearly: 300,
+    teachingHoursYearly: "xxx",
     studentsMentored: 1000,
     countriesVisitedPresented: 6,
   },
@@ -58,7 +58,7 @@ export const profileData = {
     {
       name: "Prof. OUATTARA Soualiho",
       role: "Directeur de Thèse",
-      contact: "2250707356102 | ouattso@hotmail.com",
+      contact: "XXX | XXXX",
     },
     {
       name: "Dr. YAO Koffi Mathias",
@@ -70,13 +70,13 @@ export const profileData = {
   timeline: [
     {
       year: "2026",
-      title: { fr: "FENS Forum 2026 Barcelona & Soutenance de Thèse (Prévue)", en: "FENS Forum 2026 Barcelona & PhD Defense (Expected)" },
-      desc: { fr: "Présentation à Barcelone des travaux EEG sur l'apprentissage adaptatif. Soutenance du Doctorat en Neurosciences.", en: "Poster presentation in Barcelona on adaptive learning EEG. PhD defense in Cognitive Neuroscience." }
+      title: { fr: "FENS Forum 2026 Barcelona", en: "FENS Forum 2026 Barcelona" },
+      desc: { fr: "Présentation à Barcelone des travaux EEG sur l'apprentissage adaptatif", en: "Poster presentation in Barcelona on adaptive learning EEG." }
     },
     {
       year: "2025",
       title: { fr: "Certification Neuromatch & Projets IA (JobpilotAI / Agrikora)", en: "Neuromatch Certification & AI Breakthroughs (JobpilotAI / Agrikora)" },
-      desc: { fr: "128h en Neurosciences Computationnelles (Neuromatch). Lauréat et présentateur au colloque PASRES, UVCI, FAC.", en: "128-hour Computational Neuroscience at Neuromatch. Speaker at PASRES, UVCI, Climate Forum." }
+      desc: { fr: "128h en Neurosciences Computationnelles (Neuromatch). Présentateur au colloque FONSTI, UVCI, FAC.", en: "128-hour Computational Neuroscience at Neuromatch. Speaker at PASRES, UVCI, Climate Forum." }
     },
     {
       year: "2024",
@@ -84,7 +84,7 @@ export const profileData = {
       desc: { fr: "Communications internationales à Paris 8, AFROHUN-CI, AfricaDigitalEdu et Marrakech.", en: "International conference presentations at Paris 8, AFROHUN One Health, AfricaDigitalEdu and Marrakech." }
     },
     {
-      year: "2023",
+      year: "2022",
       title: { fr: "Début du Doctorat en Neurosciences (UFHB)", en: "PhD Program Commencement (UFHB)" },
       desc: { fr: "Inscription en Thèse à l'École Doctorale Biologie-Environnement-Santé.", en: "Enrollment in the PhD program at the Doctoral School of Biology-Environment-Health." }
     },

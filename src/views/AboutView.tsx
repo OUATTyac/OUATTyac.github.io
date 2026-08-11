@@ -83,14 +83,14 @@ export const AboutView: React.FC = () => {
         <div className="space-y-6 text-xs">
           <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/80 dark:border-slate-700/80">
             <div className="flex items-center justify-between font-bold text-indigo-600 dark:text-indigo-400 mb-1">
-              <span>Doctorat en Neurosciences Cognitives (En cours - Soutenance 2026)</span>
-              <span>2023 - 2026</span>
+              <span>Doctorat en Neurosciences Cognitives (En cours)</span>
+              <span>2022 - 2026</span>
             </div>
             <div className="font-bold text-slate-900 dark:text-slate-100 text-sm">
               Université Félix Houphouët-Boigny (UFHB) - École Doctorale Biologie-Environnement-Santé
             </div>
             <p className="text-slate-600 dark:text-slate-400 mt-2">
-              Sujet de thèse : Impact des technologies numériques et des écrans sur la mémoire de travail visuospatiale, les profils oscillatoires EEG pariéto-occipitales et l'apprentissage adaptatif.
+              Sujet de thèse : Examen neuroscientifique des facteurs intervenants dans l'efficacité des écrans comme outil pour l'apprentissage.
             </p>
           </div>
 

@@ -94,7 +94,7 @@ export const initialCommunications: Communication[] = [
   {
     id: "comm-2025-2",
     title: "Impact des vagues de chaleur sur la santé mentale et les fonctions cognitives en Afrique : une revue systématique",
-    authors: ["Ouattara, Y.", "Yao, K. M.", "Doubran, P. J.", "Ouattara, S."],
+    authors: ["Ouattara, Y.", "Yao, K. M.", "Badie, G. J.", "Ouattara, S."],
     type: "oral",
     conference: "Forum Africain sur le Climat (FAC 2025)",
     organizer: "PTR Changement Climatique CAMES & UFHB",
@@ -119,12 +119,11 @@ export const initialCommunications: Communication[] = [
     country: "Côte d'Ivoire",
     dates: "June 2025",
     year: 2025,
-    award: "Deuxième Prix de la Meilleure Communication Orale (2nd Prize Best Oral Communication)",
     abstract: {
-      fr: "Présentation récompensée par le 2e Prix. Modélisation basée sur le Machine Learning pour discriminer les états de fatigue attentionnelle, de surcharge cognitive et de concentration optimale à partir de signaux EEG 14 canaux.",
-      en: "Award-winning oral communication (2nd Prize). Machine Learning pipeline discriminating attentional fatigue, cognitive overload, and peak focus states from 14-channel EEG recordings."
+      fr: "Modélisation basée sur le Machine Learning pour discriminer les états de fatigue attentionnelle, de surcharge cognitive et de concentration optimale à partir de signaux EEG 14 canaux.",
+      en: "Machine Learning pipeline discriminating attentional fatigue, cognitive overload, and peak focus states from 14-channel EEG recordings."
     },
-    keywords: ["Award Winner", "Clinical Research", "EEG Signal Classification", "Machine Learning", "Cognitive Load"]
+    keywords: [ "Clinical Research", "EEG Signal Classification", "Machine Learning", "Cognitive Load"]
   },
   {
     id: "comm-2025-4",
