@@ -21,6 +21,7 @@ import { GalleryMediaView } from './views/GalleryMediaView';
 import { AwardsView } from './views/AwardsView';
 import { CvView } from './views/CvView';
 import { ContactView } from './views/ContactView';
+import { NewsView } from './views/NewsView';
 
 import { Publication, Communication } from './types';
 
@@ -49,6 +50,8 @@ export default function App() {
         return <PublicationsView onSelectPublication={setSelectedPublication} />;
       case 'communications':
         return <CommunicationsView onSelectCommunication={setSelectedCommunication} />;
+      case 'news':
+        return <NewsView />;
       case 'projects':
         return <ProjectsView />;
       case 'software':
