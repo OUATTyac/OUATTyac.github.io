@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import {
   X, Plus, Trash2, Download, Upload, RotateCcw, Check, Sparkles, Award,
   BookOpen, MessageSquare, Briefcase, Newspaper, Image as ImageIcon,
-  FileText, Paperclip, Copy, ExternalLink, Film, FolderPlus, Link2, Pencil, Edit3, Save
+  FileText, Paperclip, Copy, ExternalLink, Film, FolderPlus, Link2, Pencil, Edit3, Save, LogIn, LogOut
 } from 'lucide-react';
 import { useContent, MediaFile } from '../context/ContentContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { Publication, Communication, Project, NewsItem, GalleryPhoto } from '../types';
 
 interface AdminHubProps {
@@ -15,6 +16,7 @@ interface AdminHubProps {
 
 export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
   const { t } = useLanguage();
+  const { user, login, logout, loading } = useAuth();
   const {
     publications,
     communications,
@@ -38,6 +40,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
     updateNewsItem,
     updateGalleryPhoto,
     updateMediaFile,
+    addAward,
     awards,
     updateAward,
     deleteItem,
@@ -125,6 +128,50 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 text-center">
+           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 animate-fade-in">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-sm w-full p-8 shadow-2xl relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center mx-auto text-indigo-600 dark:text-indigo-400">
+              <Sparkles className="w-8 h-8" />
+            </div>
+            
+            <div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Connexion Admin</h3>
+              <p className="text-sm text-slate-500 mt-2">Connectez-vous avec votre compte autorisé pour modifier le contenu du site.</p>
+            </div>
+
+            <button
+              onClick={login}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition mt-6"
+            >
+              <LogIn className="w-5 h-5" />
+              <span>Se connecter avec Google</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // File reader helper with image compression
   const handleFileRead = (
@@ -364,12 +411,21 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={logout}
+              className="text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 p-2 rounded-full hover:bg-rose-50 dark:hover:bg-rose-950/30 transition flex items-center gap-1.5 text-xs font-semibold"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Déconnexion</span>
+            </button>
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {successMsg && (

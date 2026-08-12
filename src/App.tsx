@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ContentProvider } from './context/ContentContext';
 import { Navbar } from './components/Navbar';
@@ -74,50 +75,52 @@ export default function App() {
   };
 
   return (
-    <LanguageProvider>
-      <ContentProvider>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col">
-          {/* Top Sticky Navbar */}
-          <Navbar
-            activeView={activeView}
-            setActiveView={setActiveView}
-            onOpenAdmin={() => setIsAdminOpen(true)}
-            onOpenSearch={() => setIsSearchOpen(true)}
-          />
+    <AuthProvider>
+      <LanguageProvider>
+        <ContentProvider>
+          <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-500 selection:text-white flex flex-col">
+            {/* Top Sticky Navbar */}
+            <Navbar
+              activeView={activeView}
+              setActiveView={setActiveView}
+              onOpenAdmin={() => setIsAdminOpen(true)}
+              onOpenSearch={() => setIsSearchOpen(true)}
+            />
 
-          {/* Main Content View Frame */}
-          <main className="flex-1 pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-            {renderCurrentView()}
-          </main>
+            {/* Main Content View Frame */}
+            <main className="flex-1 pt-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+              {renderCurrentView()}
+            </main>
 
-          {/* Site Footer */}
-          <Footer setActiveView={setActiveView} />
+            {/* Site Footer */}
+            <Footer setActiveView={setActiveView} />
 
-          {/* Interactive Modals */}
-          <AdminHub
-            isOpen={isAdminOpen}
-            onClose={() => setIsAdminOpen(false)}
-          />
+            {/* Interactive Modals */}
+            <AdminHub
+              isOpen={isAdminOpen}
+              onClose={() => setIsAdminOpen(false)}
+            />
 
-          <SearchModal
-            isOpen={isSearchOpen}
-            onClose={() => setIsSearchOpen(false)}
-            setActiveView={setActiveView}
-            onSelectPublication={setSelectedPublication}
-          />
+            <SearchModal
+              isOpen={isSearchOpen}
+              onClose={() => setIsSearchOpen(false)}
+              setActiveView={setActiveView}
+              onSelectPublication={setSelectedPublication}
+            />
 
-          <BibtexModal
-            publication={selectedPublication}
-            onClose={() => setSelectedPublication(null)}
-          />
+            <BibtexModal
+              publication={selectedPublication}
+              onClose={() => setSelectedPublication(null)}
+            />
 
-          <PdfViewerModal
-            item={selectedCommunication}
-            onClose={() => setSelectedCommunication(null)}
-          />
-        </div>
-      </ContentProvider>
-    </LanguageProvider>
+            <PdfViewerModal
+              item={selectedCommunication}
+              onClose={() => setSelectedCommunication(null)}
+            />
+          </div>
+        </ContentProvider>
+      </LanguageProvider>
+    </AuthProvider>
   );
 }
 

@@ -1,4 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { useAuth } from './AuthContext';
+
 import {
   Publication,
   Communication,
@@ -98,6 +102,8 @@ interface ContentContextType {
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { user } = useAuth();
+
   const [publications, setPublications] = useState<Publication[]>(() => {
     try {
       const saved = localStorage.getItem('yac_pubs');
@@ -201,78 +207,124 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Sync to localStorage
+  // Fetch initial data from Firestore
+  useEffect(() => {
+    getDoc(doc(db, 'portfolio', 'data')).then((docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.publications) setPublications(data.publications);
+        if (data.communications) setCommunications(data.communications);
+        if (data.projects) setProjects(data.projects);
+        if (data.news) setNews(data.news);
+        if (data.software) setSoftware(data.software);
+        if (data.datasets) setDatasets(data.datasets);
+        if (data.galleryPhotos) setGalleryPhotos(data.galleryPhotos);
+        if (data.mediaFiles) setMediaFiles(data.mediaFiles);
+        if (data.awards) setAwards(data.awards);
+        if (data.profilePhotoUrl) setProfilePhotoUrl(data.profilePhotoUrl);
+      }
+    }).catch(console.error);
+  }, []);
+
+  const syncToFirestore = async (key: string, value: any) => {
+    if (!user) return;
+    try {
+      await setDoc(doc(db, 'portfolio', 'data'), { [key]: value }, { merge: true });
+    } catch (e) {
+      console.warn("Firestore sync error", e);
+    }
+  };
+
+  // Sync to localStorage and Firestore
   useEffect(() => {
     try {
       localStorage.setItem('yac_pubs', JSON.stringify(publications));
+      syncToFirestore('publications', publications);
     } catch (e) {
       console.warn("Storage quota exceeded", e);
     }
-  }, [publications]);
+  }, [publications, user]);
 
   useEffect(() => {
     try {
       localStorage.setItem('yac_comms', JSON.stringify(communications));
+      syncToFirestore('communications', communications);
     } catch (e) {
       console.warn("Storage quota exceeded", e);
     }
-  }, [communications]);
+  }, [communications, user]);
 
   useEffect(() => {
     try {
       localStorage.setItem('yac_projects', JSON.stringify(projects));
+      syncToFirestore('projects', projects);
     } catch (e) {
       console.warn("Storage quota exceeded", e);
     }
-  }, [projects]);
+  }, [projects, user]);
 
   useEffect(() => {
     try {
       localStorage.setItem('yac_news', JSON.stringify(news));
+      syncToFirestore('news', news);
     } catch (e) {
       console.warn("Storage quota exceeded", e);
     }
-  }, [news]);
+  }, [news, user]);
 
   useEffect(() => {
     try {
       localStorage.setItem('yac_software', JSON.stringify(software));
+      syncToFirestore('software', software);
     } catch (e) {
       console.warn("Storage quota exceeded", e);
     }
-  }, [software]);
+  }, [software, user]);
 
   useEffect(() => {
     try {
       localStorage.setItem('yac_datasets', JSON.stringify(datasets));
+      syncToFirestore('datasets', datasets);
     } catch (e) {
       console.warn("Storage quota exceeded", e);
     }
-  }, [datasets]);
+  }, [datasets, user]);
 
   useEffect(() => {
     try {
       localStorage.setItem('yac_gallery', JSON.stringify(galleryPhotos));
+      syncToFirestore('galleryPhotos', galleryPhotos);
     } catch (e) {
       console.warn("Storage quota exceeded", e);
     }
-  }, [galleryPhotos]);
+  }, [galleryPhotos, user]);
 
   useEffect(() => {
     try {
       localStorage.setItem('yac_media', JSON.stringify(mediaFiles));
+      syncToFirestore('mediaFiles', mediaFiles);
     } catch (e) {
       console.warn("Storage quota exceeded", e);
     }
-  }, [mediaFiles]);
+  }, [mediaFiles, user]);
 
   useEffect(() => {
     try {
       localStorage.setItem('yac_awards', JSON.stringify(awards));
+      syncToFirestore('awards', awards);
     } catch (e) {
       console.warn("Storage quota exceeded", e);
     }
-  }, [awards]);
+  }, [awards, user]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('yac_profile_photo', profilePhotoUrl);
+      syncToFirestore('profilePhotoUrl', profilePhotoUrl);
+    } catch (e) {
+      console.warn("Storage quota exceeded", e);
+    }
+  }, [profilePhotoUrl, user]);
 
   const addPublication = (pubData: Omit<Publication, 'id'>) => {
     const newPub: Publication = {

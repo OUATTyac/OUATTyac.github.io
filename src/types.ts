@@ -186,7 +186,7 @@ export interface Award {
   };
   organization: string;
   year: number;
-  category: 'academic' | 'grant' | 'certification' | 'prize';
+  category: 'academic' | 'grant' | 'certification' | 'prize' | 'award';
   description: {
     fr: string;
     en: string;
