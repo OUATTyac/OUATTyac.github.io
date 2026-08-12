@@ -1,6 +1,6 @@
 {
   "name": "Yacouba Ouattara - Academic Platform",
-  "description": "Official Academic & Scientific Platform of Yacouba Ouattara, PhD Candidate in Cognitive Neuroscience, AI & Neuroeducation at UFHB.",
+  "description": "Official Academic & Scientific Platform of Yacouba Ouattara, PhD Candidate in Cognitive Neuroscience & AI at UFHB.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
