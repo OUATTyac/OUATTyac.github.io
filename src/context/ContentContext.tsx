@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth } from './AuthContext';
 
@@ -201,36 +201,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return profileData.photoUrl;
   });
 
-  const updateProfilePhotoUrl = (url: string) => {
-    setProfilePhotoUrl(url);
-    try {
-      localStorage.setItem('yac_profile_photo', url);
-    } catch {
-      // Ignore local storage error
-    }
-  };
-
-  // Fetch initial data from Firestore
-  useEffect(() => {
-    getDoc(doc(db, 'portfolio', 'data')).then((docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        if (data.publications) setPublications(data.publications);
-        if (data.communications) setCommunications(data.communications);
-        if (data.projects) setProjects(data.projects);
-        if (data.news) setNews(data.news);
-        if (data.software) setSoftware(data.software);
-        if (data.datasets) setDatasets(data.datasets);
-        if (data.galleryPhotos) setGalleryPhotos(data.galleryPhotos);
-        if (data.mediaFiles) setMediaFiles(data.mediaFiles);
-        if (data.awards) setAwards(data.awards);
-        if (data.profilePhotoUrl && data.profilePhotoUrl.trim() !== '' && data.profilePhotoUrl !== '/profile.jpg') {
-          setProfilePhotoUrl(data.profilePhotoUrl);
-        }
-      }
-    }).catch(console.error);
-  }, []);
-
   const syncToFirestore = async (key: string, value: any) => {
     try {
       await setDoc(doc(db, 'portfolio', 'data'), { [key]: value }, { merge: true });
@@ -239,213 +209,293 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Sync to localStorage and Firestore
-  useEffect(() => {
+  const updateProfilePhotoUrl = (url: string) => {
+    setProfilePhotoUrl(url);
     try {
-      localStorage.setItem('yac_pubs', JSON.stringify(publications));
-      syncToFirestore('publications', publications);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
+      localStorage.setItem('yac_profile_photo', url);
+      syncToFirestore('profilePhotoUrl', url);
+    } catch {
+      // Ignore local storage error
     }
-  }, [publications, user]);
+  };
 
+  // Realtime subscription from Firestore
   useEffect(() => {
-    try {
-      localStorage.setItem('yac_comms', JSON.stringify(communications));
-      syncToFirestore('communications', communications);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
-    }
-  }, [communications, user]);
+    const unsubscribe = onSnapshot(
+      doc(db, 'portfolio', 'data'),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.publications) {
+            setPublications(data.publications);
+            try { localStorage.setItem('yac_pubs', JSON.stringify(data.publications)); } catch {}
+          }
+          if (data.communications) {
+            setCommunications(data.communications);
+            try { localStorage.setItem('yac_comms', JSON.stringify(data.communications)); } catch {}
+          }
+          if (data.projects) {
+            setProjects(data.projects);
+            try { localStorage.setItem('yac_projects', JSON.stringify(data.projects)); } catch {}
+          }
+          if (data.news) {
+            setNews(data.news);
+            try { localStorage.setItem('yac_news', JSON.stringify(data.news)); } catch {}
+          }
+          if (data.software) {
+            setSoftware(data.software);
+            try { localStorage.setItem('yac_software', JSON.stringify(data.software)); } catch {}
+          }
+          if (data.datasets) {
+            setDatasets(data.datasets);
+            try { localStorage.setItem('yac_datasets', JSON.stringify(data.datasets)); } catch {}
+          }
+          if (data.galleryPhotos) {
+            setGalleryPhotos(data.galleryPhotos);
+            try { localStorage.setItem('yac_gallery', JSON.stringify(data.galleryPhotos)); } catch {}
+          }
+          if (data.mediaFiles) {
+            setMediaFiles(data.mediaFiles);
+            try { localStorage.setItem('yac_media', JSON.stringify(data.mediaFiles)); } catch {}
+          }
+          if (data.awards) {
+            setAwards(data.awards);
+            try { localStorage.setItem('yac_awards', JSON.stringify(data.awards)); } catch {}
+          }
+          if (data.profilePhotoUrl && data.profilePhotoUrl.trim() !== '' && data.profilePhotoUrl !== '/profile.jpg') {
+            setProfilePhotoUrl(data.profilePhotoUrl);
+            try { localStorage.setItem('yac_profile_photo', data.profilePhotoUrl); } catch {}
+          }
+        }
+      },
+      (error) => {
+        console.warn("Firestore listener error:", error);
+      }
+    );
 
-  useEffect(() => {
-    try {
-      localStorage.setItem('yac_projects', JSON.stringify(projects));
-      syncToFirestore('projects', projects);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
-    }
-  }, [projects, user]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('yac_news', JSON.stringify(news));
-      syncToFirestore('news', news);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
-    }
-  }, [news, user]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('yac_software', JSON.stringify(software));
-      syncToFirestore('software', software);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
-    }
-  }, [software, user]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('yac_datasets', JSON.stringify(datasets));
-      syncToFirestore('datasets', datasets);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
-    }
-  }, [datasets, user]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('yac_gallery', JSON.stringify(galleryPhotos));
-      syncToFirestore('galleryPhotos', galleryPhotos);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
-    }
-  }, [galleryPhotos, user]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('yac_media', JSON.stringify(mediaFiles));
-      syncToFirestore('mediaFiles', mediaFiles);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
-    }
-  }, [mediaFiles, user]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('yac_awards', JSON.stringify(awards));
-      syncToFirestore('awards', awards);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
-    }
-  }, [awards, user]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('yac_profile_photo', profilePhotoUrl);
-      syncToFirestore('profilePhotoUrl', profilePhotoUrl);
-    } catch (e) {
-      console.warn("Storage quota exceeded", e);
-    }
-  }, [profilePhotoUrl, user]);
+    return () => unsubscribe();
+  }, []);
 
   const addPublication = (pubData: Omit<Publication, 'id'>) => {
-    const newPub: Publication = {
-      ...pubData,
-      id: `pub-${Date.now()}`
-    };
-    setPublications(prev => [newPub, ...prev]);
+    const newPub: Publication = { ...pubData, id: `pub-${Date.now()}` };
+    setPublications(prev => {
+      const updated = [newPub, ...prev];
+      try { localStorage.setItem('yac_pubs', JSON.stringify(updated)); } catch {}
+      syncToFirestore('publications', updated);
+      return updated;
+    });
   };
 
   const addCommunication = (commData: Omit<Communication, 'id'>) => {
-    const newComm: Communication = {
-      ...commData,
-      id: `comm-${Date.now()}`
-    };
-    setCommunications(prev => [newComm, ...prev]);
+    const newComm: Communication = { ...commData, id: `comm-${Date.now()}` };
+    setCommunications(prev => {
+      const updated = [newComm, ...prev];
+      try { localStorage.setItem('yac_comms', JSON.stringify(updated)); } catch {}
+      syncToFirestore('communications', updated);
+      return updated;
+    });
   };
 
   const addProject = (projData: Omit<Project, 'id'>) => {
-    const newProj: Project = {
-      ...projData,
-      id: `proj-${Date.now()}`
-    };
-    setProjects(prev => [newProj, ...prev]);
+    const newProj: Project = { ...projData, id: `proj-${Date.now()}` };
+    setProjects(prev => {
+      const updated = [newProj, ...prev];
+      try { localStorage.setItem('yac_projects', JSON.stringify(updated)); } catch {}
+      syncToFirestore('projects', updated);
+      return updated;
+    });
   };
 
   const addNewsItem = (newsData: Omit<NewsItem, 'id'>) => {
-    const newNews: NewsItem = {
-      ...newsData,
-      id: `news-${Date.now()}`
-    };
-    setNews(prev => [newNews, ...prev]);
+    const newNews: NewsItem = { ...newsData, id: `news-${Date.now()}` };
+    setNews(prev => {
+      const updated = [newNews, ...prev];
+      try { localStorage.setItem('yac_news', JSON.stringify(updated)); } catch {}
+      syncToFirestore('news', updated);
+      return updated;
+    });
   };
 
   const addDataset = (datasetData: Omit<Dataset, 'id'>) => {
-    const newDs: Dataset = {
-      ...datasetData,
-      id: `ds-${Date.now()}`
-    };
-    setDatasets(prev => [newDs, ...prev]);
+    const newDs: Dataset = { ...datasetData, id: `ds-${Date.now()}` };
+    setDatasets(prev => {
+      const updated = [newDs, ...prev];
+      try { localStorage.setItem('yac_datasets', JSON.stringify(updated)); } catch {}
+      syncToFirestore('datasets', updated);
+      return updated;
+    });
   };
 
   const addSoftware = (swData: Omit<Software, 'id'>) => {
-    const newSw: Software = {
-      ...swData,
-      id: `sw-${Date.now()}`
-    };
-    setSoftware(prev => [newSw, ...prev]);
+    const newSw: Software = { ...swData, id: `sw-${Date.now()}` };
+    setSoftware(prev => {
+      const updated = [newSw, ...prev];
+      try { localStorage.setItem('yac_software', JSON.stringify(updated)); } catch {}
+      syncToFirestore('software', updated);
+      return updated;
+    });
   };
 
   const addGalleryPhoto = (photoData: Omit<GalleryPhoto, 'id'>) => {
-    const newPhoto: GalleryPhoto = {
-      ...photoData,
-      id: `photo-${Date.now()}`
-    };
-    setGalleryPhotos(prev => [newPhoto, ...prev]);
+    const newPhoto: GalleryPhoto = { ...photoData, id: `photo-${Date.now()}` };
+    setGalleryPhotos(prev => {
+      const updated = [newPhoto, ...prev];
+      try { localStorage.setItem('yac_gallery', JSON.stringify(updated)); } catch {}
+      syncToFirestore('galleryPhotos', updated);
+      return updated;
+    });
   };
 
   const deleteGalleryPhoto = (id: string) => {
-    setGalleryPhotos(prev => prev.filter(p => p.id !== id));
+    setGalleryPhotos(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      try { localStorage.setItem('yac_gallery', JSON.stringify(updated)); } catch {}
+      syncToFirestore('galleryPhotos', updated);
+      return updated;
+    });
   };
 
   const addMediaFile = (mediaData: Omit<MediaFile, 'id' | 'createdAt'>) => {
-    const newMedia: MediaFile = {
-      ...mediaData,
-      id: `media-${Date.now()}`,
-      createdAt: new Date().toISOString()
-    };
-    setMediaFiles(prev => [newMedia, ...prev]);
+    const newMedia: MediaFile = { ...mediaData, id: `media-${Date.now()}`, createdAt: new Date().toISOString() };
+    setMediaFiles(prev => {
+      const updated = [newMedia, ...prev];
+      try { localStorage.setItem('yac_media', JSON.stringify(updated)); } catch {}
+      syncToFirestore('mediaFiles', updated);
+      return updated;
+    });
   };
 
   const deleteMediaFile = (id: string) => {
-    setMediaFiles(prev => prev.filter(m => m.id !== id));
+    setMediaFiles(prev => {
+      const updated = prev.filter(m => m.id !== id);
+      try { localStorage.setItem('yac_media', JSON.stringify(updated)); } catch {}
+      syncToFirestore('mediaFiles', updated);
+      return updated;
+    });
   };
 
   const addAward = (awardData: Omit<Award, 'id'>) => {
-    const newAward: Award = {
-      ...awardData,
-      id: `award-${Date.now()}`
-    };
-    setAwards(prev => [newAward, ...prev]);
+    const newAward: Award = { ...awardData, id: `award-${Date.now()}` };
+    setAwards(prev => {
+      const updated = [newAward, ...prev];
+      try { localStorage.setItem('yac_awards', JSON.stringify(updated)); } catch {}
+      syncToFirestore('awards', updated);
+      return updated;
+    });
   };
 
   const updateAward = (award: Award) => {
-    setAwards(prev => prev.map(a => a.id === award.id ? award : a));
+    setAwards(prev => {
+      const updated = prev.map(a => a.id === award.id ? award : a);
+      try { localStorage.setItem('yac_awards', JSON.stringify(updated)); } catch {}
+      syncToFirestore('awards', updated);
+      return updated;
+    });
   };
 
   const updatePublication = (pub: Publication) => {
-    setPublications(prev => prev.map(p => p.id === pub.id ? pub : p));
+    setPublications(prev => {
+      const updated = prev.map(p => p.id === pub.id ? pub : p);
+      try { localStorage.setItem('yac_pubs', JSON.stringify(updated)); } catch {}
+      syncToFirestore('publications', updated);
+      return updated;
+    });
   };
 
   const updateCommunication = (comm: Communication) => {
-    setCommunications(prev => prev.map(c => c.id === comm.id ? comm : c));
+    setCommunications(prev => {
+      const updated = prev.map(c => c.id === comm.id ? comm : c);
+      try { localStorage.setItem('yac_comms', JSON.stringify(updated)); } catch {}
+      syncToFirestore('communications', updated);
+      return updated;
+    });
   };
 
   const updateProject = (proj: Project) => {
-    setProjects(prev => prev.map(p => p.id === proj.id ? proj : p));
+    setProjects(prev => {
+      const updated = prev.map(p => p.id === proj.id ? proj : p);
+      try { localStorage.setItem('yac_projects', JSON.stringify(updated)); } catch {}
+      syncToFirestore('projects', updated);
+      return updated;
+    });
   };
 
   const updateNewsItem = (newsItem: NewsItem) => {
-    setNews(prev => prev.map(n => n.id === newsItem.id ? newsItem : n));
+    setNews(prev => {
+      const updated = prev.map(n => n.id === newsItem.id ? newsItem : n);
+      try { localStorage.setItem('yac_news', JSON.stringify(updated)); } catch {}
+      syncToFirestore('news', updated);
+      return updated;
+    });
   };
 
   const updateGalleryPhoto = (photo: GalleryPhoto) => {
-    setGalleryPhotos(prev => prev.map(gp => gp.id === photo.id ? photo : gp));
+    setGalleryPhotos(prev => {
+      const updated = prev.map(gp => gp.id === photo.id ? photo : gp);
+      try { localStorage.setItem('yac_gallery', JSON.stringify(updated)); } catch {}
+      syncToFirestore('galleryPhotos', updated);
+      return updated;
+    });
   };
 
   const updateMediaFile = (media: MediaFile) => {
-    setMediaFiles(prev => prev.map(m => m.id === media.id ? media : m));
+    setMediaFiles(prev => {
+      const updated = prev.map(m => m.id === media.id ? media : m);
+      try { localStorage.setItem('yac_media', JSON.stringify(updated)); } catch {}
+      syncToFirestore('mediaFiles', updated);
+      return updated;
+    });
   };
 
   const deleteItem = (collection: 'publications' | 'communications' | 'projects' | 'news' | 'gallery' | 'awards', id: string) => {
-    if (collection === 'publications') setPublications(prev => prev.filter(i => i.id !== id));
-    if (collection === 'communications') setCommunications(prev => prev.filter(i => i.id !== id));
-    if (collection === 'projects') setProjects(prev => prev.filter(i => i.id !== id));
-    if (collection === 'news') setNews(prev => prev.filter(i => i.id !== id));
-    if (collection === 'gallery') setGalleryPhotos(prev => prev.filter(i => i.id !== id));
-    if (collection === 'awards') setAwards(prev => prev.filter(i => i.id !== id));
+    if (collection === 'publications') {
+      setPublications(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        try { localStorage.setItem('yac_pubs', JSON.stringify(updated)); } catch {}
+        syncToFirestore('publications', updated);
+        return updated;
+      });
+    }
+    if (collection === 'communications') {
+      setCommunications(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        try { localStorage.setItem('yac_comms', JSON.stringify(updated)); } catch {}
+        syncToFirestore('communications', updated);
+        return updated;
+      });
+    }
+    if (collection === 'projects') {
+      setProjects(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        try { localStorage.setItem('yac_projects', JSON.stringify(updated)); } catch {}
+        syncToFirestore('projects', updated);
+        return updated;
+      });
+    }
+    if (collection === 'news') {
+      setNews(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        try { localStorage.setItem('yac_news', JSON.stringify(updated)); } catch {}
+        syncToFirestore('news', updated);
+        return updated;
+      });
+    }
+    if (collection === 'gallery') {
+      setGalleryPhotos(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        try { localStorage.setItem('yac_gallery', JSON.stringify(updated)); } catch {}
+        syncToFirestore('galleryPhotos', updated);
+        return updated;
+      });
+    }
+    if (collection === 'awards') {
+      setAwards(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        try { localStorage.setItem('yac_awards', JSON.stringify(updated)); } catch {}
+        syncToFirestore('awards', updated);
+        return updated;
+      });
+    }
   };
 
   const resetAllToDefault = () => {
