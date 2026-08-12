@@ -46,7 +46,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const featuredProjects = projects.slice(0, 4);
 
   // Source d'image prioritaire ou fallback
-  const resolvedPhotoUrl = (profilePhotoUrl && profilePhotoUrl.trim() !== '' && profilePhotoUrl !== '/profile.jpg')
+  const resolvedPhotoUrl = profilePhotoUrl && profilePhotoUrl.trim() !== ''
     ? profilePhotoUrl
     : profileData.photoUrl;
 
