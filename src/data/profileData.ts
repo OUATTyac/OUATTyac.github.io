@@ -1,4 +1,4 @@
-import defaultProfilePic from '../assets/profile.jpg';
+//import defaultProfilePic from '../assets/profile.jpg';
 
 export const profileData = {
   name: "Yacouba OUATTARA",
@@ -27,7 +27,7 @@ export const profileData = {
   phonePrimary: "+225 05 56 38 30 00",
   phoneSecondary: "",
   location: "Abidjan, Côte d'Ivoire",
-  photoUrl: defaultProfilePic,
+  photoUrl: "/profile.jpg"
   orcid: "0009-0003-4527-1461",
   orcidUrl: "https://orcid.org/0009-0003-4527-1461",
   linkedinUrl: "https://www.linkedin.com/in/yacouba-ouattara-089743146/",
