@@ -124,11 +124,12 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
               <div className="aspect-[4/3] rounded-2xl bg-gradient-to-tr from-indigo-900 via-slate-900 to-indigo-950 relative overflow-hidden mb-6 flex items-center justify-center text-white">
                 <img
-                  src={(profilePhotoUrl && profilePhotoUrl.trim() !== '') ? profilePhotoUrl : profileData.photoUrl}
+                  src={(profilePhotoUrl && profilePhotoUrl.trim() !== '' && profilePhotoUrl !== '/profile.jpg') ? profilePhotoUrl : profileData.photoUrl}
                   alt={profileData.name}
                   onError={(e) => {
                     const target = e.currentTarget;
-                    if (target.src !== profileData.photoUrl) {
+                    if (!target.dataset.fallback) {
+                      target.dataset.fallback = 'true';
                       target.src = profileData.photoUrl;
                     }
                   }}

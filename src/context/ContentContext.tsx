@@ -192,10 +192,13 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string>(() => {
     try {
       const saved = localStorage.getItem('yac_profile_photo');
-      return saved || profileData.photoUrl;
+      if (saved && saved.trim() !== '' && saved !== '/profile.jpg') {
+        return saved;
+      }
     } catch {
-      return profileData.photoUrl;
+      // Ignore local storage error
     }
+    return profileData.photoUrl;
   });
 
   const updateProfilePhotoUrl = (url: string) => {
@@ -221,7 +224,9 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (data.galleryPhotos) setGalleryPhotos(data.galleryPhotos);
         if (data.mediaFiles) setMediaFiles(data.mediaFiles);
         if (data.awards) setAwards(data.awards);
-        if (data.profilePhotoUrl) setProfilePhotoUrl(data.profilePhotoUrl);
+        if (data.profilePhotoUrl && data.profilePhotoUrl.trim() !== '' && data.profilePhotoUrl !== '/profile.jpg') {
+          setProfilePhotoUrl(data.profilePhotoUrl);
+        }
       }
     }).catch(console.error);
   }, []);

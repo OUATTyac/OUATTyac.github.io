@@ -5,6 +5,7 @@ import {
   FileText, Paperclip, Copy, ExternalLink, Film, FolderPlus, Link2, Pencil, Edit3, Save, LogIn, LogOut
 } from 'lucide-react';
 import { useContent, MediaFile } from '../context/ContentContext';
+import { profileData } from '../data/profileData';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { Publication, Communication, Project, NewsItem, GalleryPhoto } from '../types';
@@ -172,7 +173,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
       setLoginError('');
       const ok = loginWithPasscode(passcode);
       if (!ok) {
-        setLoginError("Code PIN incorrect.");
+        setLoginError("Code PIN incorrect. (Code par défaut: 2026)");
       }
     };
 
@@ -230,7 +231,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                       type="password"
                       value={passcode}
                       onChange={(e) => setPasscode(e.target.value)}
-                      placeholder="Ex: ton nom"
+                      placeholder="Ex: 2026"
                       className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <button
@@ -240,7 +241,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                       Valider
                     </button>
                   </div>
-                  <p className="text-[10px] text-slate-400">Code par défaut: ton nom</p>
+                  <p className="text-[10px] text-slate-400">Code PIN par défaut: 2026</p>
                 </form>
               )}
             </div>
@@ -1289,7 +1290,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
 
                 <div className="flex items-center gap-4">
                   <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-md shrink-0 border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 relative">
-                    <img src={profilePhotoUrl || "https://placehold.co/400x500/1e1e2f/ffffff?text=Photo"} alt="Current Profile" className="w-full h-full object-cover" />
+                    <img src={(profilePhotoUrl && profilePhotoUrl.trim() !== '' && profilePhotoUrl !== '/profile.jpg') ? profilePhotoUrl : profileData.photoUrl} alt="Current Profile" className="w-full h-full object-cover" />
                   </div>
                   
                   <div className="flex-1 space-y-3">
