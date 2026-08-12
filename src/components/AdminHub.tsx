@@ -172,7 +172,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
       setLoginError('');
       const ok = loginWithPasscode(passcode);
       if (!ok) {
-        setLoginError("Code PIN incorrect. (Code par défaut: 2026)");
+        setLoginError("Code PIN incorrect.");
       }
     };
 
@@ -230,7 +230,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                       type="password"
                       value={passcode}
                       onChange={(e) => setPasscode(e.target.value)}
-                      placeholder="Ex: 2026"
+                      placeholder="Ex: ton nom"
                       className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <button
@@ -240,7 +240,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                       Valider
                     </button>
                   </div>
-                  <p className="text-[10px] text-slate-400">Code PIN par défaut: 2026</p>
+                  <p className="text-[10px] text-slate-400">Code par défaut: ton nom</p>
                 </form>
               )}
             </div>
