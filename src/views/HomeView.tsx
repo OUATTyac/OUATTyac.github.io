@@ -7,10 +7,6 @@ import {
   ArrowRight,
   Award,
   Calendar,
-  Globe,
-  Sparkles,
-  Activity,
-  CheckCircle2,
   ChevronRight,
   ExternalLink,
   Building2,
@@ -36,11 +32,23 @@ export const HomeView: React.FC<HomeViewProps> = ({
   onSelectCommunication
 }) => {
   const { t } = useLanguage();
-  const { publications = [], communications = [], projects = [], researchAreas = [], news = [], profilePhotoUrl } = useContent();
+  const { 
+    publications = [], 
+    communications = [], 
+    projects = [], 
+    researchAreas = [], 
+    news = [], 
+    profilePhotoUrl 
+  } = useContent();
 
   const featuredPubs = publications.slice(0, 5);
   const featuredComms = communications.slice(0, 4);
   const featuredProjects = projects.slice(0, 4);
+
+  // Source d'image prioritaire ou fallback
+  const resolvedPhotoUrl = (profilePhotoUrl && profilePhotoUrl.trim() !== '' && profilePhotoUrl !== '/profile.jpg')
+    ? profilePhotoUrl
+    : profileData.photoUrl;
 
   return (
     <div className="space-y-16 pb-12 animate-fade-in">
@@ -124,7 +132,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
               <div className="aspect-[4/3] rounded-2xl bg-gradient-to-tr from-indigo-900 via-slate-900 to-indigo-950 relative overflow-hidden mb-6 flex items-center justify-center text-white">
                 <img
-                  src={(profilePhotoUrl && profilePhotoUrl.trim() !== '' && profilePhotoUrl !== '/profile.jpg') ? profilePhotoUrl : profileData.photoUrl}
+                  src={resolvedPhotoUrl}
                   alt={profileData.name}
                   onError={(e) => {
                     const target = e.currentTarget;
@@ -269,7 +277,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         <EegSignalChart />
       </section>
 
-      {/* FEATURED PROJECTS (4 MINI-SITES) */}
+      {/* FEATURED PROJECTS */}
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -347,7 +355,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             onClick={() => setActiveView('publications')}
             className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline flex items-center gap-1"
           >
-            {t("Voir les 6 publications", "View All 6 Publications")}
+            {t("Voir toutes les publications", "View All Publications")}
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -408,7 +416,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* FEATURED COMMUNICATIONS (FENS 2026, UCAD, PASTEUR, CAMES) */}
+      {/* FEATURED COMMUNICATIONS */}
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -423,7 +431,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
             onClick={() => setActiveView('communications')}
             className="text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline flex items-center gap-1"
           >
-            {t("Voir les 13 communications", "View All 13 Communications")}
+            {t("Voir toutes les communications", "View All Communications")}
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -522,15 +530,15 @@ export const HomeView: React.FC<HomeViewProps> = ({
 
                 {item.imageUrl && (
                   <div className="mb-3 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-video bg-slate-100 dark:bg-slate-800">
-                    <img src={item.imageUrl} alt={t(item.title)} className="w-full h-full object-cover" />
+                    <img src={item.imageUrl} alt={typeof item.title === 'string' ? item.title : t(item.title.fr, item.title.en)} className="w-full h-full object-cover" />
                   </div>
                 )}
 
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
-                  {t(item.title)}
+                  {typeof item.title === 'string' ? item.title : t(item.title.fr, item.title.en)}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 mt-2">
-                  {t(item.summary)}
+                  {typeof item.summary === 'string' ? item.summary : t(item.summary.fr, item.summary.en)}
                 </p>
               </div>
 
