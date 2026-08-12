@@ -1,12 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Par défaut, fermer l'accès direct aux autres documents non spécifiés
     match /{document=**} {
       allow read, write: if false;
     }
 
+    // Autoriser la lecture et l'écriture publiques sur le document 'data' de la collection 'portfolio'
     match /portfolio/data {
-      // Anyone can read and write the portfolio data from the admin panel
       allow read, write: if true;
     }
   }
