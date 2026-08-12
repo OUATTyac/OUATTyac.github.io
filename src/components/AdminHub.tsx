@@ -16,7 +16,7 @@ interface AdminHubProps {
 
 export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
   const { t } = useLanguage();
-  const { user, login, logout, loading } = useAuth();
+  const { user, login, loginWithPasscode, logout, loading } = useAuth();
   const {
     publications,
     communications,
@@ -52,6 +52,12 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<'pub' | 'comm' | 'media' | 'news' | 'profile' | 'manage'>('pub');
   const [successMsg, setSuccessMsg] = useState('');
   const [userPhotoUrlInput, setUserPhotoUrlInput] = useState('');
+
+  // Login states
+  const [passcode, setPasscode] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [showPasscode, setShowPasscode] = useState(false);
 
   // Form states for Publication
   const [pubTitle, setPubTitle] = useState('');
@@ -140,9 +146,39 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
   }
 
   if (!user) {
+    const handleGoogleLogin = async () => {
+      setIsLoggingIn(true);
+      setLoginError('');
+      try {
+        await login();
+      } catch (err: any) {
+        console.error("Login error:", err);
+        if (err?.code === 'auth/unauthorized-domain') {
+          setLoginError("Domaine non autorisé dans Firebase : Rendez-vous sur la Console Firebase > Authentication > Paramètres > Domaines autorisés, et ajoutez 'ouattyac.github.io'. Vous pouvez aussi utiliser le Code PIN ci-dessous.");
+        } else if (err?.code === 'auth/popup-closed-by-user') {
+          setLoginError("Connexion annulée : La fenêtre Google s'est fermée.");
+        } else if (err?.code === 'auth/popup-blocked') {
+          setLoginError("Pop-up bloquée par le navigateur. Autorisez les fenêtres pop-up pour ce site.");
+        } else {
+          setLoginError(err?.message || "Erreur lors de la connexion Google. Utilisez le Code PIN ci-dessous.");
+        }
+      } finally {
+        setIsLoggingIn(false);
+      }
+    };
+
+    const handlePasscodeLogin = (e: React.FormEvent) => {
+      e.preventDefault();
+      setLoginError('');
+      const ok = loginWithPasscode(passcode);
+      if (!ok) {
+        setLoginError("Code PIN incorrect. (Code par défaut: 2026)");
+      }
+    };
+
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4 animate-fade-in">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-sm w-full p-8 shadow-2xl relative">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-md w-full p-8 shadow-2xl relative">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition"
@@ -156,17 +192,58 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
             </div>
             
             <div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Connexion Admin</h3>
-              <p className="text-sm text-slate-500 mt-2">Connectez-vous avec votre compte autorisé pour modifier le contenu du site.</p>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Connexion Administration</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Connectez-vous avec Google ou par Code PIN pour gérer votre portfolio.</p>
             </div>
 
+            {loginError && (
+              <div className="p-3 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-300 rounded-xl text-xs text-left leading-relaxed">
+                {loginError}
+              </div>
+            )}
+
             <button
-              onClick={login}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition mt-6"
+              onClick={handleGoogleLogin}
+              disabled={isLoggingIn}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-xl font-bold transition shadow-md text-sm cursor-pointer"
             >
               <LogIn className="w-5 h-5" />
-              <span>Se connecter avec Google</span>
+              <span>{isLoggingIn ? "Connexion en cours..." : "Se connecter avec Google"}</span>
             </button>
+
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800">
+              {!showPasscode ? (
+                <button
+                  type="button"
+                  onClick={() => setShowPasscode(true)}
+                  className="text-xs font-semibold text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition cursor-pointer"
+                >
+                  Connexion alternative par Code PIN Admin
+                </button>
+              ) : (
+                <form onSubmit={handlePasscodeLogin} className="space-y-3 pt-1 text-left">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                    Code PIN d'administration
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="password"
+                      value={passcode}
+                      onChange={(e) => setPasscode(e.target.value)}
+                      placeholder="Ex: 2026"
+                      className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-bold rounded-xl text-xs hover:bg-slate-800 transition cursor-pointer"
+                    >
+                      Valider
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-slate-400">Code PIN par défaut: 2026</p>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       </div>

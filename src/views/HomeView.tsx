@@ -124,8 +124,14 @@ export const HomeView: React.FC<HomeViewProps> = ({
             <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-3xl p-6 shadow-xl relative overflow-hidden group">
               <div className="aspect-[4/3] rounded-2xl bg-gradient-to-tr from-indigo-900 via-slate-900 to-indigo-950 relative overflow-hidden mb-6 flex items-center justify-center text-white">
                 <img
-                  src={profilePhotoUrl || profileData.photoUrl}
+                  src={(profilePhotoUrl && profilePhotoUrl.trim() !== '') ? profilePhotoUrl : profileData.photoUrl}
                   alt={profileData.name}
+                  onError={(e) => {
+                    const target = e.currentTarget;
+                    if (target.src !== profileData.photoUrl) {
+                      target.src = profileData.photoUrl;
+                    }
+                  }}
                   className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
