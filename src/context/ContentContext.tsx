@@ -201,11 +201,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return profileData.photoUrl;
   });
 
+  // Fonction de synchronisation vers Firestore avec gestion d'erreur améliorée
   const syncToFirestore = async (key: string, value: any) => {
     try {
-      await setDoc(doc(db, 'portfolio', 'data'), { [key]: value }, { merge: true });
+      const docRef = doc(db, 'portfolio', 'data');
+      await setDoc(docRef, { [key]: value }, { merge: true });
+      console.log(`✅ Synchronisation Firestore réussie pour : ${key}`);
     } catch (e) {
-      console.warn("Firestore sync error", e);
+      console.error("❌ Erreur de synchronisation Firestore :", e);
     }
   };
 
@@ -219,7 +222,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }
   };
 
-  // Realtime subscription from Firestore
+  // Abonnement en temps réel à Firestore
   useEffect(() => {
     const unsubscribe = onSnapshot(
       doc(db, 'portfolio', 'data'),
