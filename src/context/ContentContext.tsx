@@ -232,7 +232,6 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   }, []);
 
   const syncToFirestore = async (key: string, value: any) => {
-    if (!user) return;
     try {
       await setDoc(doc(db, 'portfolio', 'data'), { [key]: value }, { merge: true });
     } catch (e) {
