@@ -1,15 +1,19 @@
 name: Deploy to GitHub Pages
 
 on:
+  # Se déclenche à chaque fois que vous poussez du code sur la branche 'main'
   push:
     branches: ['main']
+  # Permet de lancer le déploiement manuellement depuis l'interface GitHub
   workflow_dispatch:
 
+# Définit les permissions nécessaires pour le déploiement
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Permet d'annuler les déploiements en cours si un nouveau code est poussé
 concurrency:
   group: 'pages'
   cancel-in-progress: true
@@ -23,26 +27,27 @@ jobs:
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
-
+      
       - name: Configuration de Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-
+          
       - name: Installation des dépendances
         run: npm ci
-
+        
       - name: Construction du site (Build)
         run: npm run build
-
+        
       - name: Configuration des Pages
         uses: actions/configure-pages@v4
-
+        
       - name: Upload de l'artefact
         uses: actions/upload-pages-artifact@v3
         with:
+          # Spécifie le dossier où Vite a généré le site de production
           path: './dist'
-
+          
       - name: Déploiement sur GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
