@@ -138,10 +138,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4 text-white">
                   <div className="text-xs font-bold uppercase tracking-wider text-indigo-300">
-                    UFHB Biosciences Lab
+                    UFHB Biology and Health Lab
                   </div>
                   <div className="text-sm font-semibold">
-                    Yacouba OUATTARA • Cognitive EEG Research
+                    Yacouba OUATTARA • Cognitive & Health Research
                   </div>
                 </div>
               </div>
