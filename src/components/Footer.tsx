@@ -39,7 +39,12 @@ export const Footer: React.FC<FooterProps> = ({ setActiveView }) => {
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <button onClick={() => setActiveView('research')} className="hover:text-indigo-400 transition">
+                <button onClick={() => setActiveView('news')} className="hover:text-indigo-400 transition cursor-pointer">
+                  {t("Actualités & Annonces (FENS 2026, Bourses)", "News & Announcements")}
+                </button>
+              </li>
+              <li>
+                <button onClick={() => setActiveView('research')} className="hover:text-indigo-400 transition cursor-pointer">
                   {t("Axes de Recherche (Working Memory, EEG, IA)", "Research Areas")}
                 </button>
               </li>
