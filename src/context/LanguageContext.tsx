@@ -39,16 +39,42 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const t = (frVal: any, enVal?: any) => {
     if (frVal === undefined || frVal === null) {
-      if (enVal !== undefined && enVal !== null) return enVal;
+      if (enVal !== undefined && enVal !== null) {
+        return typeof enVal === 'string' ? enVal : (enVal.en || enVal.fr || '');
+      }
       return '';
     }
-    // If enVal is omitted and frVal is an object like { fr: '...', en: '...' }
-    if (enVal === undefined && typeof frVal === 'object' && !Array.isArray(frVal)) {
-      const chosen = language === 'fr' ? (frVal.fr ?? frVal.en) : (frVal.en ?? frVal.fr);
-      return chosen ?? '';
+
+    // If frVal is a primitive string or number
+    if (typeof frVal === 'string' || typeof frVal === 'number') {
+      if (enVal !== undefined && enVal !== null && language === 'en') {
+        return typeof enVal === 'string' ? enVal : (enVal.en || enVal.fr || String(frVal));
+      }
+      return String(frVal);
     }
+
+    // If frVal is an object (and not an array)
+    if (typeof frVal === 'object' && !Array.isArray(frVal)) {
+      const chosen = language === 'fr' ? (frVal.fr ?? frVal.en) : (frVal.en ?? frVal.fr);
+      if (typeof chosen === 'string' || typeof chosen === 'number') {
+        return String(chosen);
+      }
+      if (Array.isArray(chosen)) {
+        return chosen;
+      }
+      if (typeof chosen === 'object' && chosen !== null) {
+        return chosen.fr || chosen.en || '';
+      }
+      return '';
+    }
+
+    // If frVal is an array
+    if (Array.isArray(frVal)) {
+      return frVal;
+    }
+
     const chosen = language === 'fr' ? frVal : (enVal !== undefined ? enVal : frVal);
-    return chosen ?? '';
+    return typeof chosen === 'string' || typeof chosen === 'number' ? String(chosen) : '';
   };
 
   return (
