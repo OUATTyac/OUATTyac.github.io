@@ -1,5 +1,10 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { 
+  getAuth, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut 
+} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // Configuration Firebase issue de ton nouveau projet "portfolioyacouba"
@@ -15,9 +20,29 @@ const firebaseConfig = {
 // Initialisation de Firebase
 const app = initializeApp(firebaseConfig);
 
-// Exportation des services pour ton application
+// Exportation des services
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export const db = getFirestore(app);
+
+// Helper pour la connexion Google Popup
+export const loginWithGoogle = async () => {
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    return result.user;
+  } catch (error) {
+    console.error("Erreur de connexion Google :", error);
+    return null;
+  }
+};
+
+// Helper pour la déconnexion
+export const logout = async () => {
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.error("Erreur lors de la déconnexion :", error);
+  }
+};
 
 export default app;
