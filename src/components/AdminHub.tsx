@@ -173,7 +173,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
       setLoginError('');
       const ok = loginWithPasscode(passcode);
       if (!ok) {
-        setLoginError("Code PIN incorrect.");
+        setLoginError("Code PIN incorrect. (Code par défaut: 2026)");
       }
     };
 
@@ -231,7 +231,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                       type="password"
                       value={passcode}
                       onChange={(e) => setPasscode(e.target.value)}
-                      placeholder="Ex: ton nom"
+                      placeholder="Ex: 2026"
                       className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <button
@@ -241,7 +241,7 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                       Valider
                     </button>
                   </div>
-                  <p className="text-[10px] text-slate-400">Code par défaut: ton nom</p>
+                  <p className="text-[10px] text-slate-400">Code PIN par défaut: 2026</p>
                 </form>
               )}
             </div>
@@ -1539,7 +1539,9 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
                             <span className="font-bold text-indigo-600 dark:text-indigo-400">{proj.role}</span>
                             <span className="text-slate-400">• {proj.period}</span>
                           </div>
-                          <h5 className="font-bold text-slate-900 dark:text-slate-100 text-xs line-clamp-1">{proj.title.fr}</h5>
+                          <h5 className="font-bold text-slate-900 dark:text-slate-100 text-xs line-clamp-1">
+                            {typeof proj.title === 'string' ? proj.title : (proj.title?.fr || proj.title?.en || '')}
+                          </h5>
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
@@ -2382,64 +2384,139 @@ export const AdminHub: React.FC<AdminHubProps> = ({ isOpen, onClose }) => {
               className="space-y-3"
             >
               <div>
-                <label className="block font-bold mb-1">Titre du Projet (FR) *</label>
+                <label className="block font-bold mb-1">Titre du Projet *</label>
                 <input
                   type="text"
                   required
-                  value={editingProj.title.fr}
-                  onChange={e => setEditingProj({
-                    ...editingProj,
-                    title: { ...editingProj.title, fr: e.target.value, en: editingProj.title.en || e.target.value }
-                  })}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                  value={typeof editingProj.title === 'string' ? editingProj.title : (editingProj.title?.fr || editingProj.title?.en || '')}
+                  onChange={e => {
+                    const newTitle = e.target.value;
+                    setEditingProj({
+                      ...editingProj,
+                      title: typeof editingProj.title === 'object' && editingProj.title !== null
+                        ? { ...editingProj.title, fr: newTitle, en: (editingProj.title as any).en || newTitle }
+                        : newTitle
+                    });
+                  }}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold mb-1">Rôle</label>
+                  <label className="block font-bold mb-1">Catégorie</label>
                   <input
                     type="text"
-                    value={editingProj.role}
-                    onChange={e => setEditingProj({ ...editingProj, role: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                    value={editingProj.category || ''}
+                    onChange={e => setEditingProj({ ...editingProj, category: e.target.value })}
+                    placeholder="Ex: ai_neuro, agri_tech"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   />
                 </div>
                 <div>
                   <label className="block font-bold mb-1">Période</label>
                   <input
                     type="text"
-                    value={editingProj.period}
+                    value={editingProj.period || ''}
                     onChange={e => setEditingProj({ ...editingProj, period: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                    placeholder="Ex: 2024 - Present"
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1">Sous-titre / Accroche (Tagline)</label>
+                <input
+                  type="text"
+                  value={typeof editingProj.tagline === 'string' ? editingProj.tagline : (typeof editingProj.subtitle === 'string' ? editingProj.subtitle : (editingProj.subtitle?.fr || ''))}
+                  onChange={e => setEditingProj({ ...editingProj, tagline: e.target.value })}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                />
               </div>
 
               <div>
                 <label className="block font-bold mb-1">Description (FR)</label>
                 <textarea
                   rows={3}
-                  value={editingProj.description.fr}
-                  onChange={e => setEditingProj({
-                    ...editingProj,
-                    description: { ...editingProj.description, fr: e.target.value, en: editingProj.description.en || e.target.value }
-                  })}
-                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border rounded-xl"
+                  value={typeof editingProj.description === 'string' ? editingProj.description : (editingProj.description?.fr || '')}
+                  onChange={e => {
+                    const newFr = e.target.value;
+                    const oldEn = typeof editingProj.description === 'object' && editingProj.description !== null ? (editingProj.description.en || newFr) : newFr;
+                    setEditingProj({
+                      ...editingProj,
+                      description: { fr: newFr, en: oldEn }
+                    });
+                  }}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div>
+                <label className="block font-bold mb-1">Description (EN)</label>
+                <textarea
+                  rows={3}
+                  value={typeof editingProj.description === 'string' ? editingProj.description : (editingProj.description?.en || '')}
+                  onChange={e => {
+                    const newEn = e.target.value;
+                    const oldFr = typeof editingProj.description === 'object' && editingProj.description !== null ? (editingProj.description.fr || newEn) : newEn;
+                    setEditingProj({
+                      ...editingProj,
+                      description: { fr: oldFr, en: newEn }
+                    });
+                  }}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold mb-1">Lien GitHub</label>
+                  <input
+                    type="text"
+                    value={editingProj.githubUrl || ''}
+                    onChange={e => setEditingProj({ ...editingProj, githubUrl: e.target.value })}
+                    placeholder="https://github.com/..."
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold mb-1">Lien Démo / Site Web</label>
+                  <input
+                    type="text"
+                    value={editingProj.demoUrl || ''}
+                    onChange={e => setEditingProj({ ...editingProj, demoUrl: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1">Technologies (séparées par des virgules)</label>
+                <input
+                  type="text"
+                  value={Array.isArray(editingProj.technologies) ? editingProj.technologies.join(', ') : ''}
+                  onChange={e => setEditingProj({
+                    ...editingProj,
+                    technologies: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                  })}
+                  placeholder="Python, PyTorch, FastAPI, React"
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditingProj(null)}
-                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-semibold"
+                  className="px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-xl font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5"
+                  className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold flex items-center gap-1.5 transition shadow-md"
                 >
                   <Save className="w-4 h-4" />
                   <span>{t("Enregistrer les modifications", "Save Changes")}</span>
