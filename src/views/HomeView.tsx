@@ -45,6 +45,13 @@ export const HomeView: React.FC<HomeViewProps> = ({
   const featuredComms = communications.slice(0, 4);
   const featuredProjects = projects.slice(0, 4);
 
+  // Helper pour sécuriser le rendu texte (chaîne vs objet multilingue)
+  const renderText = (val: any): string => {
+    if (!val) return '';
+    if (typeof val === 'string') return val;
+    return (t(val) as string) || val.fr || val.en || '';
+  };
+
   // Source d'image prioritaire ou fallback
   const resolvedPhotoUrl = profilePhotoUrl && profilePhotoUrl.trim() !== ''
     ? profilePhotoUrl
@@ -217,7 +224,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
       </section>
 
-      {/* RESEARCH HIGHLIGHTS (6 CARDS) */}
+      {/* RESEARCH HIGHLIGHTS */}
       <section className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -249,10 +256,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                   <Brain className="w-6 h-6" />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
-                  {t(area.title.fr, area.title.en)}
+                  {renderText(area.title)}
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-4">
-                  {t(area.shortDesc.fr, area.shortDesc.en)}
+                  {renderText(area.shortDesc)}
                 </p>
               </div>
 
@@ -291,45 +298,52 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {featuredProjects.map(proj => (
-            <div
-              key={proj.id}
-              onClick={() => setActiveView('projects')}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer group flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-3">
-                  <span className="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs">
-                    {proj.period}
-                  </span>
-                  <span className="text-xs text-slate-400 font-medium">{proj.category.toUpperCase()}</span>
-                </div>
-
-                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
-                  {proj.title}
-                </h3>
-                <p className="text-xs font-semibold text-slate-500 mb-3">{proj.tagline}</p>
-                <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
-                  {t(proj.description.fr, proj.description.en)}
-                </p>
-              </div>
-
-              <div>
-                <div className="flex flex-wrap gap-1.5 mb-4">
-                  {proj.technologies.slice(0, 5).map(tech => (
-                    <span key={tech} className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-medium">
-                      {tech}
+          {featuredProjects.map(proj => {
+            if (!proj) return null;
+            return (
+              <div
+                key={proj.id}
+                onClick={() => setActiveView('projects')}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-lg transition cursor-pointer group flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs">
+                      {renderText(proj.period)}
                     </span>
-                  ))}
+                    <span className="text-xs text-slate-400 font-medium">
+                      {renderText(proj.category).toUpperCase()}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">
+                    {renderText(proj.title)}
+                  </h3>
+                  <p className="text-xs font-semibold text-slate-500 mb-3">
+                    {renderText(proj.tagline || proj.subtitle)}
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4">
+                    {renderText(proj.description)}
+                  </p>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                  <span>{t("Consulter le mini-site projet", "Explore Project Mini-Site")}</span>
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+                <div>
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {(Array.isArray(proj.technologies) ? proj.technologies : []).slice(0, 5).map((tech, idx) => (
+                      <span key={idx} className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-medium">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                    <span>{t("Consulter le mini-site projet", "Explore Project Mini-Site")}</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -354,58 +368,61 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         <div className="space-y-4">
-          {featuredPubs.map(pub => (
-            <div
-              key={pub.id}
-              className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-800 transition flex flex-col sm:flex-row items-start justify-between gap-4"
-            >
-              <div className="space-y-2 flex-1">
-                <div className="flex items-center gap-2">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                    pub.status === 'published'
-                      ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'
-                      : 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'
-                  }`}>
-                    {pub.status === 'published' ? 'Published' : 'Under Review'}
-                  </span>
-                  <span className="text-xs text-slate-400 font-semibold">{pub.year}</span>
+          {featuredPubs.map(pub => {
+            if (!pub) return null;
+            return (
+              <div
+                key={pub.id}
+                className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-sm hover:border-indigo-300 dark:hover:border-indigo-800 transition flex flex-col sm:flex-row items-start justify-between gap-4"
+              >
+                <div className="space-y-2 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                      pub.status === 'published'
+                        ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400'
+                        : 'bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400'
+                    }`}>
+                      {pub.status === 'published' ? 'Published' : 'Under Review'}
+                    </span>
+                    <span className="text-xs text-slate-400 font-semibold">{pub.year}</span>
+                  </div>
+
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                    {renderText(pub.title)}
+                  </h3>
+
+                  <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                    {Array.isArray(pub.authors) ? pub.authors.join(', ') : pub.authors}
+                  </div>
+
+                  <div className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold italic">
+                    {pub.journal} {pub.volume ? `(${pub.volume})` : ''}
+                  </div>
                 </div>
 
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 leading-snug">
-                  {pub.title}
-                </h3>
-
-                <div className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-                  {pub.authors.join(', ')}
-                </div>
-
-                <div className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold italic">
-                  {pub.journal} {pub.volume ? `(${pub.volume})` : ''}
-                </div>
-              </div>
-
-              <div className="flex sm:flex-col gap-2 shrink-0">
-                {pub.doi && (
-                  <a
-                    href={pub.doi.startsWith('http') ? pub.doi : `https://doi.org/${pub.doi.replace(/^https?:\/\/(dx\.)?doi\.org\//i, '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-xs"
+                <div className="flex sm:flex-col gap-2 shrink-0">
+                  {pub.doi && (
+                    <a
+                      href={pub.doi.startsWith('http') ? pub.doi : `https://doi.org/${pub.doi.replace(/^https?:\/\/(dx\.)?doi\.org\//i, '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition flex items-center gap-1.5 shadow-xs"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      <span>Lien DOI</span>
+                    </a>
+                  )}
+                  <button
+                    onClick={() => onSelectPublication(pub)}
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-xs transition flex items-center gap-1.5"
                   >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Lien DOI</span>
-                  </a>
-                )}
-                <button
-                  onClick={() => onSelectPublication(pub)}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 text-slate-800 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 font-semibold text-xs transition flex items-center gap-1.5"
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>APA / BibTeX</span>
-                </button>
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>APA / BibTeX</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -430,35 +447,38 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {featuredComms.map(comm => (
-            <div
-              key={comm.id}
-              onClick={() => onSelectCommunication(comm)}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between text-xs mb-3">
-                  <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold uppercase">
-                    {comm.type}
-                  </span>
-                  <span className="text-slate-400 font-medium">{comm.dates} • {comm.location}</span>
+          {featuredComms.map(comm => {
+            if (!comm) return null;
+            return (
+              <div
+                key={comm.id}
+                onClick={() => onSelectCommunication(comm)}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between text-xs mb-3">
+                    <span className="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 font-bold uppercase">
+                      {comm.type}
+                    </span>
+                    <span className="text-slate-400 font-medium">{comm.dates} • {comm.location}</span>
+                  </div>
+
+                  <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-2 leading-snug">
+                    {renderText(comm.title)}
+                  </h3>
+
+                  <div className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-3">
+                    {comm.conference}
+                  </div>
                 </div>
 
-                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 mb-2 leading-snug">
-                  {comm.title}
-                </h3>
-
-                <div className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-3">
-                  {comm.conference}
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-semibold text-slate-500">
+                  <span>{comm.country}</span>
+                  <span className="text-indigo-600 dark:text-indigo-400">{t("Voir détails & PDF", "View details & PDF")}</span>
                 </div>
               </div>
-
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-semibold text-slate-500">
-                <span>{comm.country}</span>
-                <span className="text-indigo-600 dark:text-indigo-400">{t("Voir détails & PDF", "View details & PDF")}</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -481,10 +501,10 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 {item.year}
               </div>
               <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                {t(item.title.fr, item.title.en)}
+                {renderText(item.title)}
               </h3>
               <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-                {t(item.desc.fr, item.desc.en)}
+                {renderText(item.desc)}
               </p>
             </div>
           ))}
@@ -510,73 +530,76 @@ export const HomeView: React.FC<HomeViewProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {news.slice(0, 3).map(item => (
-            <div
-              key={item.id}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-3 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
-                  <Calendar className="w-3.5 h-3.5 text-indigo-500" />
-                  <span>{item.date}</span>
-                </div>
-
-                {item.imageUrl && (
-                  <div className="mb-3 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-video bg-slate-100 dark:bg-slate-800">
-                    <img src={item.imageUrl} alt={typeof item.title === 'string' ? item.title : t(item.title.fr, item.title.en)} className="w-full h-full object-cover" />
+          {news.slice(0, 3).map(item => {
+            if (!item) return null;
+            return (
+              <div
+                key={item.id}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm space-y-3 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
+                    <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>{item.date}</span>
                   </div>
-                )}
 
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
-                  {typeof item.title === 'string' ? item.title : t(item.title.fr, item.title.en)}
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 mt-2">
-                  {typeof item.summary === 'string' ? item.summary : t(item.summary.fr, item.summary.en)}
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  {item.pdfUrl && (
-                    <a
-                      href={item.pdfUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
-                      className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-bold transition inline-flex items-center gap-1"
-                    >
-                      <Download className="w-3 h-3" />
-                      <span>PDF</span>
-                    </a>
+                  {item.imageUrl && (
+                    <div className="mb-3 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 aspect-video bg-slate-100 dark:bg-slate-800">
+                      <img src={item.imageUrl} alt={renderText(item.title)} className="w-full h-full object-cover" />
+                    </div>
                   )}
 
-                  {item.videoUrl && (
-                    <a
-                      href={item.videoUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[10px] font-bold transition inline-flex items-center gap-1"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                      <span>Vidéo</span>
-                    </a>
-                  )}
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                    {renderText(item.title)}
+                  </h3>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-3 mt-2">
+                    {renderText(item.summary)}
+                  </p>
+                </div>
 
-                  {item.linkUrl && (
-                    <a
-                      href={item.linkUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1"
-                    >
-                      <span>{t("En savoir plus", "Read More")}</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {item.pdfUrl && (
+                      <a
+                        href={item.pdfUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-bold transition inline-flex items-center gap-1"
+                      >
+                        <Download className="w-3 h-3" />
+                        <span>PDF</span>
+                      </a>
+                    )}
+
+                    {item.videoUrl && (
+                      <a
+                        href={item.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-2.5 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-[10px] font-bold transition inline-flex items-center gap-1"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                        <span>Vidéo</span>
+                      </a>
+                    )}
+
+                    {item.linkUrl && (
+                      <a
+                        href={item.linkUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1"
+                      >
+                        <span>{t("En savoir plus", "Read More")}</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
     </div>
