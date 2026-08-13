@@ -1,8 +1,32 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { db } from '../lib/firebase';
-import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
-import { initialPublications, initialCommunications, initialNews, initialGalleryPhotos } from '../data/initialData';
-import { Publication, Communication, Project, NewsItem, GalleryPhoto } from '../types';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+
+import {
+  Publication,
+  Communication,
+  Project,
+  ResearchArea,
+  Software,
+  Dataset,
+  Course,
+  Award,
+  NewsItem,
+  GalleryPhoto,
+  Resource
+} from '../types';
+
+import { initialPublications } from '../data/publicationsData';
+import { initialCommunications } from '../data/communicationsData';
+import { initialProjects } from '../data/projectsData';
+import { initialResearchAreas } from '../data/researchData';
+import { initialSoftware } from '../data/softwareData';
+import { initialDatasets } from '../data/datasetsData';
+import { initialCourses, initialResources } from '../data/teachingData';
+import { initialAwards } from '../data/awardsData';
+import { initialNews } from '../data/newsData';
+import { initialGalleryPhotos } from '../data/galleryData';
+import { profileData } from '../data/profileData';
 
 export interface MediaFile {
   id: string;
@@ -13,33 +37,62 @@ export interface MediaFile {
   createdAt: string;
 }
 
+export const initialMediaFiles: MediaFile[] = [
+  {
+    id: "media-demo-eeg-video",
+    name: "Démonstration EEG 14 canaux en direct - Laboratoire UFHB.mp4",
+    type: "video",
+    url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    size: "4.2 MB",
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: "media-demo-pdf-pub",
+    name: "Article_Ouattara_2026_Cognitive_Vaccine.pdf",
+    type: "pdf",
+    url: "https://www.w3.org/W3C/DesignIssues/PDF.pdf",
+    size: "1.1 MB",
+    createdAt: new Date().toISOString()
+  }
+];
+
 interface ContentContextType {
   publications: Publication[];
   communications: Communication[];
   projects: Project[];
+  researchAreas: ResearchArea[];
+  software: Software[];
+  datasets: Dataset[];
+  courses: Course[];
+  resources: Resource[];
+  awards: Award[];
   news: NewsItem[];
   galleryPhotos: GalleryPhoto[];
   mediaFiles: MediaFile[];
-  awards: any[];
   profilePhotoUrl: string;
   updateProfilePhotoUrl: (url: string) => void;
+
   addPublication: (pub: Omit<Publication, 'id'>) => void;
-  updatePublication: (pub: Publication) => void;
   addCommunication: (comm: Omit<Communication, 'id'>) => void;
-  updateCommunication: (comm: Communication) => void;
   addProject: (proj: Omit<Project, 'id'>) => void;
-  updateProject: (proj: Project) => void;
-  addNewsItem: (item: Omit<NewsItem, 'id'>) => void;
-  updateNewsItem: (item: NewsItem) => void;
+  addNewsItem: (news: Omit<NewsItem, 'id'>) => void;
+  addDataset: (dataset: Omit<Dataset, 'id'>) => void;
+  addSoftware: (sw: Omit<Software, 'id'>) => void;
   addGalleryPhoto: (photo: Omit<GalleryPhoto, 'id'>) => void;
-  updateGalleryPhoto: (photo: GalleryPhoto) => void;
   deleteGalleryPhoto: (id: string) => void;
-  addMediaFile: (file: Omit<MediaFile, 'id' | 'createdAt'>) => void;
-  updateMediaFile: (file: MediaFile) => void;
+  addMediaFile: (media: Omit<MediaFile, 'id' | 'createdAt'>) => void;
   deleteMediaFile: (id: string) => void;
-  addAward: (award: any) => void;
-  updateAward: (award: any) => void;
-  deleteItem: (type: 'pubs' | 'comms' | 'news' | 'projects' | 'gallery' | 'media' | 'awards', id: string) => void;
+  addAward: (award: Omit<Award, 'id'>) => void;
+  
+  updatePublication: (pub: Publication) => void;
+  updateCommunication: (comm: Communication) => void;
+  updateProject: (proj: Project) => void;
+  updateNewsItem: (news: NewsItem) => void;
+  updateGalleryPhoto: (photo: GalleryPhoto) => void;
+  updateMediaFile: (media: MediaFile) => void;
+  updateAward: (award: Award) => void;
+
+  deleteItem: (collection: 'publications' | 'communications' | 'projects' | 'news' | 'gallery' | 'awards', id: string) => void;
   resetAllToDefault: () => void;
   exportBackupJSON: () => string;
   importBackupJSON: (jsonStr: string) => boolean;
@@ -47,215 +100,269 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
-const FIRESTORE_DOC_PATH = doc(db, 'portfolio', 'data');
-
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [publications, setPublications] = useState<Publication[]>(initialPublications);
   const [communications, setCommunications] = useState<Communication[]>(initialCommunications);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(initialProjects);
+  const [researchAreas] = useState<ResearchArea[]>(initialResearchAreas);
+  const [software, setSoftware] = useState<Software[]>(initialSoftware);
+  const [datasets, setDatasets] = useState<Dataset[]>(initialDatasets);
+  const [courses] = useState<Course[]>(initialCourses);
+  const [resources] = useState<Resource[]>(initialResources);
+  const [awards, setAwards] = useState<Award[]>(initialAwards);
   const [news, setNews] = useState<NewsItem[]>(initialNews);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>(initialGalleryPhotos);
-  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
-  const [awards, setAwards] = useState<any[]>([]);
-  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string>('');
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(initialMediaFiles);
+  const [profilePhotoUrl, setProfilePhotoUrl] = useState<string>(profileData.photoUrl);
 
-  // 1. Écoute en temps réel des modifications depuis Firebase Cloud Firestore
-  useEffect(() => {
-    const unsub = onSnapshot(FIRESTORE_DOC_PATH, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.data();
-        if (data.publications) setPublications(data.publications);
-        if (data.communications) setCommunications(data.communications);
-        if (data.projects) setProjects(data.projects);
-        if (data.news) setNews(data.news);
-        if (data.galleryPhotos) setGalleryPhotos(data.galleryPhotos);
-        if (data.mediaFiles) setMediaFiles(data.mediaFiles);
-        if (data.awards) setAwards(data.awards);
-        if (data.profilePhotoUrl !== undefined) setProfilePhotoUrl(data.profilePhotoUrl);
-      } else {
-        // Premier chargement : initialisation dans le cloud
-        saveToFirestore({
-          publications: initialPublications,
-          communications: initialCommunications,
-          projects: [],
-          news: initialNews,
-          galleryPhotos: initialGalleryPhotos,
-          mediaFiles: [],
-          awards: [],
-          profilePhotoUrl: ''
-        });
-      }
-    }, (error) => {
-      console.warn("Désynchronisation cloud Firebase, bascule locale :", error);
-    });
-
-    return () => unsub();
-  }, []);
-
-  // Fonction utilitaire pour tout enregistrer dans Firestore
-  const saveToFirestore = async (data: any) => {
+  const syncToFirestore = async (key: string, value: any) => {
     try {
-      await setDoc(FIRESTORE_DOC_PATH, data, { merge: true });
-    } catch (err) {
-      console.error("Erreur de sauvegarde Firebase :", err);
+      await setDoc(doc(db, 'portfolio', 'data'), { [key]: value }, { merge: true });
+      console.log(`✅ Synchronisé sur Firebase Cloud : ${key}`);
+    } catch (e) {
+      console.error("Erreur de synchro Firestore :", e);
     }
   };
 
   const updateProfilePhotoUrl = (url: string) => {
     setProfilePhotoUrl(url);
-    saveToFirestore({ profilePhotoUrl: url });
+    syncToFirestore('profilePhotoUrl', url);
   };
 
-  const addPublication = (pub: Omit<Publication, 'id'>) => {
-    const newPub = { ...pub, id: 'pub-' + Date.now() };
-    const updated = [newPub, ...publications];
-    setPublications(updated);
-    saveToFirestore({ publications: updated });
+  // Écoute en temps réel depuis Firestore
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      doc(db, 'portfolio', 'data'),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.publications) setPublications(data.publications);
+          if (data.communications) setCommunications(data.communications);
+          if (data.projects) setProjects(data.projects);
+          if (data.news) setNews(data.news);
+          if (data.software) setSoftware(data.software);
+          if (data.datasets) setDatasets(data.datasets);
+          if (data.galleryPhotos) setGalleryPhotos(data.galleryPhotos);
+          if (data.mediaFiles) setMediaFiles(data.mediaFiles);
+          if (data.awards) setAwards(data.awards);
+          if (data.profilePhotoUrl) setProfilePhotoUrl(data.profilePhotoUrl);
+        }
+      },
+      (error) => {
+        console.warn("Firestore listener warning:", error);
+      }
+    );
+
+    return () => unsubscribe();
+  }, []);
+
+  const addPublication = (pubData: Omit<Publication, 'id'>) => {
+    const newPub: Publication = { ...pubData, id: `pub-${Date.now()}` };
+    setPublications(prev => {
+      const updated = [newPub, ...prev];
+      syncToFirestore('publications', updated);
+      return updated;
+    });
   };
 
-  const updatePublication = (pub: Publication) => {
-    const updated = publications.map(p => p.id === pub.id ? pub : p);
-    setPublications(updated);
-    saveToFirestore({ publications: updated });
+  const addCommunication = (commData: Omit<Communication, 'id'>) => {
+    const newComm: Communication = { ...commData, id: `comm-${Date.now()}` };
+    setCommunications(prev => {
+      const updated = [newComm, ...prev];
+      syncToFirestore('communications', updated);
+      return updated;
+    });
   };
 
-  const addCommunication = (comm: Omit<Communication, 'id'>) => {
-    const newComm = { ...comm, id: 'comm-' + Date.now() };
-    const updated = [newComm, ...communications];
-    setCommunications(updated);
-    saveToFirestore({ communications: updated });
+  const addProject = (projData: Omit<Project, 'id'>) => {
+    const newProj: Project = { ...projData, id: `proj-${Date.now()}` };
+    setProjects(prev => {
+      const updated = [newProj, ...prev];
+      syncToFirestore('projects', updated);
+      return updated;
+    });
   };
 
-  const updateCommunication = (comm: Communication) => {
-    const updated = communications.map(c => c.id === comm.id ? comm : c);
-    setCommunications(updated);
-    saveToFirestore({ communications: updated });
+  const addNewsItem = (newsData: Omit<NewsItem, 'id'>) => {
+    const newNews: NewsItem = { ...newsData, id: `news-${Date.now()}` };
+    setNews(prev => {
+      const updated = [newNews, ...prev];
+      syncToFirestore('news', updated);
+      return updated;
+    });
   };
 
-  const addProject = (proj: Omit<Project, 'id'>) => {
-    const newProj = { ...proj, id: 'proj-' + Date.now() };
-    const updated = [newProj, ...projects];
-    setProjects(updated);
-    saveToFirestore({ projects: updated });
+  const addDataset = (datasetData: Omit<Dataset, 'id'>) => {
+    const newDs: Dataset = { ...datasetData, id: `ds-${Date.now()}` };
+    setDatasets(prev => {
+      const updated = [newDs, ...prev];
+      syncToFirestore('datasets', updated);
+      return updated;
+    });
   };
 
-  const updateProject = (proj: Project) => {
-    const updated = projects.map(p => p.id === proj.id ? proj : p);
-    setProjects(updated);
-    saveToFirestore({ projects: updated });
+  const addSoftware = (swData: Omit<Software, 'id'>) => {
+    const newSw: Software = { ...swData, id: `sw-${Date.now()}` };
+    setSoftware(prev => {
+      const updated = [newSw, ...prev];
+      syncToFirestore('software', updated);
+      return updated;
+    });
   };
 
-  const addNewsItem = (item: Omit<NewsItem, 'id'>) => {
-    const newItem = { ...item, id: 'news-' + Date.now() };
-    const updated = [newItem, ...news];
-    setNews(updated);
-    saveToFirestore({ news: updated });
-  };
-
-  const updateNewsItem = (item: NewsItem) => {
-    const updated = news.map(n => n.id === item.id ? item : n);
-    setNews(updated);
-    saveToFirestore({ news: updated });
-  };
-
-  const addGalleryPhoto = (photo: Omit<GalleryPhoto, 'id'>) => {
-    const newPhoto = { ...photo, id: 'photo-' + Date.now() };
-    const updated = [newPhoto, ...galleryPhotos];
-    setGalleryPhotos(updated);
-    saveToFirestore({ galleryPhotos: updated });
-  };
-
-  const updateGalleryPhoto = (photo: GalleryPhoto) => {
-    const updated = galleryPhotos.map(p => p.id === photo.id ? photo : p);
-    setGalleryPhotos(updated);
-    saveToFirestore({ galleryPhotos: updated });
+  const addGalleryPhoto = (photoData: Omit<GalleryPhoto, 'id'>) => {
+    const newPhoto: GalleryPhoto = { ...photoData, id: `photo-${Date.now()}` };
+    setGalleryPhotos(prev => {
+      const updated = [newPhoto, ...prev];
+      syncToFirestore('galleryPhotos', updated);
+      return updated;
+    });
   };
 
   const deleteGalleryPhoto = (id: string) => {
-    const updated = galleryPhotos.filter(p => p.id !== id);
-    setGalleryPhotos(updated);
-    saveToFirestore({ galleryPhotos: updated });
+    setGalleryPhotos(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      syncToFirestore('galleryPhotos', updated);
+      return updated;
+    });
   };
 
-  const addMediaFile = (file: Omit<MediaFile, 'id' | 'createdAt'>) => {
-    const newFile: MediaFile = { ...file, id: 'media-' + Date.now(), createdAt: new Date().toISOString() };
-    const updated = [newFile, ...mediaFiles];
-    setMediaFiles(updated);
-    saveToFirestore({ mediaFiles: updated });
-  };
-
-  const updateMediaFile = (file: MediaFile) => {
-    const updated = mediaFiles.map(m => m.id === file.id ? file : m);
-    setMediaFiles(updated);
-    saveToFirestore({ mediaFiles: updated });
+  const addMediaFile = (mediaData: Omit<MediaFile, 'id' | 'createdAt'>) => {
+    const newMedia: MediaFile = { ...mediaData, id: `media-${Date.now()}`, createdAt: new Date().toISOString() };
+    setMediaFiles(prev => {
+      const updated = [newMedia, ...prev];
+      syncToFirestore('mediaFiles', updated);
+      return updated;
+    });
   };
 
   const deleteMediaFile = (id: string) => {
-    const updated = mediaFiles.filter(m => m.id !== id);
-    setMediaFiles(updated);
-    saveToFirestore({ mediaFiles: updated });
+    setMediaFiles(prev => {
+      const updated = prev.filter(m => m.id !== id);
+      syncToFirestore('mediaFiles', updated);
+      return updated;
+    });
   };
 
-  const addAward = (award: any) => {
-    const newAward = { ...award, id: 'award-' + Date.now() };
-    const updated = [newAward, ...awards];
-    setAwards(updated);
-    saveToFirestore({ awards: updated });
+  const addAward = (awardData: Omit<Award, 'id'>) => {
+    const newAward: Award = { ...awardData, id: `award-${Date.now()}` };
+    setAwards(prev => {
+      const updated = [newAward, ...prev];
+      syncToFirestore('awards', updated);
+      return updated;
+    });
   };
 
-  const updateAward = (award: any) => {
-    const updated = awards.map(a => a.id === award.id ? award : a);
-    setAwards(updated);
-    saveToFirestore({ awards: updated });
+  const updateAward = (award: Award) => {
+    setAwards(prev => {
+      const updated = prev.map(a => a.id === award.id ? award : a);
+      syncToFirestore('awards', updated);
+      return updated;
+    });
   };
 
-  const deleteItem = (type: string, id: string) => {
-    if (type === 'pubs') {
-      const updated = publications.filter(p => p.id !== id);
-      setPublications(updated);
-      saveToFirestore({ publications: updated });
-    } else if (type === 'comms') {
-      const updated = communications.filter(c => c.id !== id);
-      setCommunications(updated);
-      saveToFirestore({ communications: updated });
-    } else if (type === 'news') {
-      const updated = news.filter(n => n.id !== id);
-      setNews(updated);
-      saveToFirestore({ news: updated });
-    } else if (type === 'projects') {
-      const updated = projects.filter(p => p.id !== id);
-      setProjects(updated);
-      saveToFirestore({ projects: updated });
-    } else if (type === 'gallery') {
-      deleteGalleryPhoto(id);
-    } else if (type === 'media') {
-      deleteMediaFile(id);
-    } else if (type === 'awards') {
-      const updated = awards.filter(a => a.id !== id);
-      setAwards(updated);
-      saveToFirestore({ awards: updated });
+  const updatePublication = (pub: Publication) => {
+    setPublications(prev => {
+      const updated = prev.map(p => p.id === pub.id ? pub : p);
+      syncToFirestore('publications', updated);
+      return updated;
+    });
+  };
+
+  const updateCommunication = (comm: Communication) => {
+    setCommunications(prev => {
+      const updated = prev.map(c => c.id === comm.id ? comm : c);
+      syncToFirestore('communications', updated);
+      return updated;
+    });
+  };
+
+  const updateProject = (proj: Project) => {
+    setProjects(prev => {
+      const updated = prev.map(p => p.id === proj.id ? proj : p);
+      syncToFirestore('projects', updated);
+      return updated;
+    });
+  };
+
+  const updateNewsItem = (newsItem: NewsItem) => {
+    setNews(prev => {
+      const updated = prev.map(n => n.id === newsItem.id ? newsItem : n);
+      syncToFirestore('news', updated);
+      return updated;
+    });
+  };
+
+  const updateGalleryPhoto = (photo: GalleryPhoto) => {
+    setGalleryPhotos(prev => {
+      const updated = prev.map(gp => gp.id === photo.id ? photo : gp);
+      syncToFirestore('galleryPhotos', updated);
+      return updated;
+    });
+  };
+
+  const updateMediaFile = (media: MediaFile) => {
+    setMediaFiles(prev => {
+      const updated = prev.map(m => m.id === media.id ? media : m);
+      syncToFirestore('mediaFiles', updated);
+      return updated;
+    });
+  };
+
+  const deleteItem = (collection: 'publications' | 'communications' | 'projects' | 'news' | 'gallery' | 'awards', id: string) => {
+    if (collection === 'publications') {
+      setPublications(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        syncToFirestore('publications', updated);
+        return updated;
+      });
+    }
+    if (collection === 'communications') {
+      setCommunications(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        syncToFirestore('communications', updated);
+        return updated;
+      });
+    }
+    if (collection === 'projects') {
+      setProjects(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        syncToFirestore('projects', updated);
+        return updated;
+      });
+    }
+    if (collection === 'news') {
+      setNews(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        syncToFirestore('news', updated);
+        return updated;
+      });
+    }
+    if (collection === 'gallery') {
+      setGalleryPhotos(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        syncToFirestore('galleryPhotos', updated);
+        return updated;
+      });
+    }
+    if (collection === 'awards') {
+      setAwards(prev => {
+        const updated = prev.filter(i => i.id !== id);
+        syncToFirestore('awards', updated);
+        return updated;
+      });
     }
   };
 
   const resetAllToDefault = () => {
     setPublications(initialPublications);
     setCommunications(initialCommunications);
-    setProjects([]);
+    setProjects(initialProjects);
     setNews(initialNews);
+    setSoftware(initialSoftware);
+    setDatasets(initialDatasets);
     setGalleryPhotos(initialGalleryPhotos);
-    setMediaFiles([]);
-    setAwards([]);
-    setProfilePhotoUrl('');
-    saveToFirestore({
-      publications: initialPublications,
-      communications: initialCommunications,
-      projects: [],
-      news: initialNews,
-      galleryPhotos: initialGalleryPhotos,
-      mediaFiles: [],
-      awards: [],
-      profilePhotoUrl: ''
-    });
+    setMediaFiles(initialMediaFiles);
   };
 
   const exportBackupJSON = () => {
@@ -264,25 +371,25 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
       communications,
       projects,
       news,
+      software,
+      datasets,
       galleryPhotos,
       mediaFiles,
-      awards,
-      profilePhotoUrl
+      exportedAt: new Date().toISOString()
     }, null, 2);
   };
 
-  const importBackupJSON = (jsonStr: string): boolean => {
+  const importBackupJSON = (jsonStr: string) => {
     try {
-      const parsed = JSON.parse(jsonStr);
-      if (parsed.publications) setPublications(parsed.publications);
-      if (parsed.communications) setCommunications(parsed.communications);
-      if (parsed.projects) setProjects(parsed.projects);
-      if (parsed.news) setNews(parsed.news);
-      if (parsed.galleryPhotos) setGalleryPhotos(parsed.galleryPhotos);
-      if (parsed.mediaFiles) setMediaFiles(parsed.mediaFiles);
-      if (parsed.awards) setAwards(parsed.awards);
-      if (parsed.profilePhotoUrl !== undefined) setProfilePhotoUrl(parsed.profilePhotoUrl);
-      saveToFirestore(parsed);
+      const data = JSON.parse(jsonStr);
+      if (data.publications) setPublications(data.publications);
+      if (data.communications) setCommunications(data.communications);
+      if (data.projects) setProjects(data.projects);
+      if (data.news) setNews(data.news);
+      if (data.software) setSoftware(data.software);
+      if (data.datasets) setDatasets(data.datasets);
+      if (data.galleryPhotos) setGalleryPhotos(data.galleryPhotos);
+      if (data.mediaFiles) setMediaFiles(data.mediaFiles);
       return true;
     } catch {
       return false;
@@ -290,37 +397,46 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   return (
-    <ContentContext.Provider value={{
-      publications,
-      communications,
-      projects,
-      news,
-      galleryPhotos,
-      mediaFiles,
-      awards,
-      profilePhotoUrl,
-      updateProfilePhotoUrl,
-      addPublication,
-      updatePublication,
-      addCommunication,
-      updateCommunication,
-      addProject,
-      updateProject,
-      addNewsItem,
-      updateNewsItem,
-      addGalleryPhoto,
-      updateGalleryPhoto,
-      deleteGalleryPhoto,
-      addMediaFile,
-      updateMediaFile,
-      deleteMediaFile,
-      addAward,
-      updateAward,
-      deleteItem,
-      resetAllToDefault,
-      exportBackupJSON,
-      importBackupJSON
-    }}>
+    <ContentContext.Provider
+      value={{
+        publications,
+        communications,
+        projects,
+        researchAreas,
+        software,
+        datasets,
+        courses,
+        resources,
+        awards,
+        news,
+        galleryPhotos,
+        mediaFiles,
+        profilePhotoUrl,
+        updateProfilePhotoUrl,
+        addPublication,
+        addCommunication,
+        addProject,
+        addNewsItem,
+        addDataset,
+        addSoftware,
+        addGalleryPhoto,
+        deleteGalleryPhoto,
+        addMediaFile,
+        deleteMediaFile,
+        updatePublication,
+        updateCommunication,
+        updateProject,
+        updateNewsItem,
+        updateGalleryPhoto,
+        updateMediaFile,
+        addAward,
+        updateAward,
+        deleteItem,
+        resetAllToDefault,
+        exportBackupJSON,
+        importBackupJSON
+      }}
+    >
       {children}
     </ContentContext.Provider>
   );
@@ -328,6 +444,8 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
 export const useContent = () => {
   const context = useContext(ContentContext);
-  if (!context) throw new Error('useContent must be used within ContentProvider');
+  if (!context) {
+    throw new Error('useContent must be used within a ContentProvider');
+  }
   return context;
 };
