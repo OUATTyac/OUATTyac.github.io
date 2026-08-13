@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { ContentProvider } from './context/ContentContext';
@@ -26,18 +26,47 @@ import { NewsView } from './views/NewsView';
 import { Publication, Communication } from './types';
 
 export default function App() {
-  const [activeView, setActiveView] = useState('home');
+  // Fonction utilitaire pour lire le hash de l'URL au chargement initial
+  const getViewFromHash = (): string => {
+    const hash = window.location.hash.replace('#', '').trim();
+    return hash || 'home';
+  };
+
+  const [activeView, setActiveView] = useState<string>(getViewFromHash);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null);
   const [selectedCommunication, setSelectedCommunication] = useState<Communication | null>(null);
+
+  // Fonction centrale pour changer de vue ET mettre à jour l'URL hash (#)
+  const handleNavigate = (view: string) => {
+    setActiveView(view);
+    if (view === 'home') {
+      // Nettoie l'URL sans recharger la page si on revient à l'accueil
+      window.history.pushState("", document.title, window.location.pathname + window.location.search);
+    } else {
+      window.location.hash = view;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Synchronisation avec les boutons Précédent/Suivant du navigateur
+  useEffect(() => {
+    const handleHashChange = () => {
+      const currentHash = window.location.hash.replace('#', '').trim();
+      setActiveView(currentHash || 'home');
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   const renderCurrentView = () => {
     switch (activeView) {
       case 'home':
         return (
           <HomeView
-            setActiveView={setActiveView}
+            setActiveView={handleNavigate}
             onSelectPublication={setSelectedPublication}
             onSelectCommunication={setSelectedCommunication}
           />
@@ -69,7 +98,7 @@ export default function App() {
       default:
         return (
           <HomeView
-            setActiveView={setActiveView}
+            setActiveView={handleNavigate}
             onSelectPublication={setSelectedPublication}
             onSelectCommunication={setSelectedCommunication}
           />
@@ -85,7 +114,7 @@ export default function App() {
             {/* Top Sticky Navbar */}
             <Navbar
               activeView={activeView}
-              setActiveView={setActiveView}
+              setActiveView={handleNavigate}
               onOpenAdmin={() => setIsAdminOpen(true)}
               onOpenSearch={() => setIsSearchOpen(true)}
             />
@@ -96,7 +125,7 @@ export default function App() {
             </main>
 
             {/* Site Footer */}
-            <Footer setActiveView={setActiveView} />
+            <Footer setActiveView={handleNavigate} />
 
             {/* Interactive Modals */}
             <AdminHub
@@ -107,7 +136,7 @@ export default function App() {
             <SearchModal
               isOpen={isSearchOpen}
               onClose={() => setIsSearchOpen(false)}
-              setActiveView={setActiveView}
+              setActiveView={handleNavigate}
               onSelectPublication={setSelectedPublication}
             />
 
@@ -126,4 +155,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-
