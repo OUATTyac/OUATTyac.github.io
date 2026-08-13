@@ -100,6 +100,13 @@ interface ContentContextType {
 
 const ContentContext = createContext<ContentContextType | undefined>(undefined);
 
+// Nettoyage automatique des valeurs `undefined` rejetées par Firestore
+const sanitizeData = (data: any): any => {
+  return JSON.parse(
+    JSON.stringify(data, (key, value) => (value === undefined ? null : value))
+  );
+};
+
 export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [publications, setPublications] = useState<Publication[]>(initialPublications);
   const [communications, setCommunications] = useState<Communication[]>(initialCommunications);
@@ -115,12 +122,14 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(initialMediaFiles);
   const [profilePhotoUrl, setProfilePhotoUrl] = useState<string>(profileData.photoUrl);
 
+  // Fonction de synchronisation vers Firestore sécurisée
   const syncToFirestore = async (key: string, value: any) => {
     try {
-      await setDoc(doc(db, 'portfolio', 'data'), { [key]: value }, { merge: true });
-      console.log(`✅ Synchronisé sur Firebase Cloud : ${key}`);
+      const cleanValue = sanitizeData(value);
+      await setDoc(doc(db, 'portfolio', 'data'), { [key]: cleanValue }, { merge: true });
+      console.log(`✅ Synchronisation Firestore réussie pour : ${key}`);
     } catch (e) {
-      console.error("Erreur de synchro Firestore :", e);
+      console.error("❌ Erreur de synchronisation Firestore :", e);
     }
   };
 
@@ -129,7 +138,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     syncToFirestore('profilePhotoUrl', url);
   };
 
-  // Écoute en temps réel depuis Firestore
+  // Abonnement en temps réel à Firestore
   useEffect(() => {
     const unsubscribe = onSnapshot(
       doc(db, 'portfolio', 'data'),
@@ -149,7 +158,7 @@ export const ContentProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
       },
       (error) => {
-        console.warn("Firestore listener warning:", error);
+        console.warn("Firestore listener error:", error);
       }
     );
 
