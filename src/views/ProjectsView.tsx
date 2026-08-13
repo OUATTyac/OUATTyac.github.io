@@ -55,18 +55,18 @@ export const ProjectsView: React.FC = () => {
                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase mb-2 inline-block ${
                   isSelected ? 'bg-indigo-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
                 }`}>
-                  {proj.category.toUpperCase()}
+                  {typeof proj.category === 'string' ? proj.category.toUpperCase() : String(t(proj.category) || '').toUpperCase()}
                 </span>
-                <h3 className="font-bold text-sm leading-snug line-clamp-1">{proj.title}</h3>
+                <h3 className="font-bold text-sm leading-snug line-clamp-1">{t(proj.title)}</h3>
                 <p className={`text-xs mt-1 line-clamp-2 ${isSelected ? 'text-indigo-100' : 'text-slate-500'}`}>
-                  {proj.tagline}
+                  {t(proj.tagline || proj.subtitle)}
                 </p>
               </div>
 
               <div className={`mt-4 pt-3 border-t text-[11px] font-semibold flex items-center justify-between ${
                 isSelected ? 'border-indigo-500 text-indigo-100' : 'border-slate-100 dark:border-slate-800 text-slate-400'
               }`}>
-                <span>{proj.period}</span>
+                <span>{t(proj.period)}</span>
                 <span>{isSelected ? t('Sélectionné', 'Active') : t('Voir', 'View')} →</span>
               </div>
             </button>
@@ -79,13 +79,13 @@ export const ProjectsView: React.FC = () => {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
           <div>
             <span className="px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase">
-              {activeProject.period} • {activeProject.category}
+              {t(activeProject.period)} • {typeof activeProject.category === 'string' ? activeProject.category : t(activeProject.category)}
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 mt-2">
-              {activeProject.title}
+              {t(activeProject.title)}
             </h2>
             <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mt-0.5">
-              {activeProject.tagline}
+              {t(activeProject.tagline || activeProject.subtitle)}
             </p>
           </div>
 
@@ -207,8 +207,8 @@ export const ProjectsView: React.FC = () => {
 
             <p className="text-xs text-slate-300">
               {t(
-                `Aperçu interactif des entrées/sorties du modèle ${activeProject.title}.`,
-                `Live input/output testing simulator for ${activeProject.title}.`
+                `Aperçu interactif des entrées/sorties du modèle ${t(activeProject.title)}.`,
+                `Live input/output testing simulator for ${t(activeProject.title)}.`
               )}
             </p>
 
