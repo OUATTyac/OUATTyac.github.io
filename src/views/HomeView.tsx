@@ -132,6 +132,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
               <span className="text-slate-300 dark:text-slate-700">•</span>
               <a href={profileData.researchGateUrl} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1.5 transition">
               <span>ResearchGate Profile</span>
+              </a>
             </div>
           </div>
 
