@@ -215,7 +215,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
           <div className="p-4 bg-slate-800/60 rounded-2xl border border-slate-700/60">
             <div className="text-3xl font-black text-rose-400 mb-1">1000+</div>
-            <div className="text-xs text-slate-300 font-medium">{t("Étudiants Formés", "Students Mentored")}</div>
+            <div className="text-xs text-slate-300 font-medium">{t("Étudiants & Professionnels Formés", "Students & Trained Professionals")}</div>
           </div>
           <div className="p-4 bg-slate-800/60 rounded-2xl border border-slate-700/60">
             <div className="text-3xl font-black text-purple-400 mb-1">{profileData.stats.countriesVisitedPresented}</div>
