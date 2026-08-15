@@ -130,7 +130,8 @@ export const HomeView: React.FC<HomeViewProps> = ({
                 HAL Open Science
               </a>
               <span className="text-slate-300 dark:text-slate-700">•</span>
-              <span>FENS Forum 2026 Barcelona Presenter</span>
+              <a href={profileData.researchGateUrl} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center gap-1.5 transition">
+              <span>ResearchGate Profile</span>
             </div>
           </div>
 
@@ -211,7 +212,7 @@ export const HomeView: React.FC<HomeViewProps> = ({
           </div>
           <div className="p-4 bg-slate-800/60 rounded-2xl border border-slate-700/60">
             <div className="text-3xl font-black text-cyan-400 mb-1">{profileData.stats.teachingHoursYearly}+</div>
-            <div className="text-xs text-slate-300 font-medium">{t("Heures d'Enseignement/An", "Teaching Hours/Yr")}</div>
+            <div className="text-xs text-slate-300 font-medium">{t("Heures de formation/Enseignement/An", "Teaching/training Hours/Yr")}</div>
           </div>
           <div className="p-4 bg-slate-800/60 rounded-2xl border border-slate-700/60">
             <div className="text-3xl font-black text-rose-400 mb-1">1000+</div>
